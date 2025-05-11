@@ -1,10 +1,11 @@
 package com.gujo.uminity.post.service;
 
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 
 public interface PostService {
-    PageResponse<PostResponseDto> listPosts(int page, int size);
+    PageResponse<PostResponseDto> listPosts(PostListRequest req);
 }
 
 /*

@@ -9,15 +9,15 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 
-public class PostResponse {
+public class PostResponseDto {
     private Long postId;
     private String title;
     private String content;
     private LocalDateTime createdAt;
     private Integer viewCnt;
 
-    public static PostResponse fromEntity(Post p) {
-        return PostResponse.builder()
+    public static PostResponseDto fromEntity(Post p) {
+        return PostResponseDto.builder()
                 .postId(p.getPostId())
                 .title(p.getTitle())
                 .content(p.getContent())

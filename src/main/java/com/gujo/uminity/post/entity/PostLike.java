@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class PostLike {
 
     @Id
@@ -36,6 +37,5 @@ public class PostLike {
             this.userId = userId;
             this.postId = postId;
         }
-        // equals & hashCode
     }
 }

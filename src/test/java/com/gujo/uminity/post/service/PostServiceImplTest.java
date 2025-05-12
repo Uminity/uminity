@@ -1,6 +1,7 @@
 package com.gujo.uminity.post.service;
 
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
+import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
@@ -16,7 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
@@ -88,4 +90,36 @@ class PostServiceImplTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 게시글");
     }
+
+    @Test
+    @DisplayName("updatePost: 존재하는 ID면 title/content 변경 후 DTO 반환")
+    void updatePost_success() {
+        // given: 수정 대상 엔티티 조회
+        given(postRepository.findById(1L))
+                .willReturn(Optional.of(postTest));
+
+        PostUpdateRequest req = new PostUpdateRequest();
+        req.setTitle("수정된제목");
+        req.setContent("수정된내용");
+
+        // when
+        PostResponseDto dto = postService.updatePost(1L, req);
+
+        // then 엔티티가 변경되어 DTO에 반영되었는지
+        assertThat(dto.getTitle()).isEqualTo("수정된제목");
+        assertThat(dto.getContent()).isEqualTo("수정된내용");
+    }
+
+    @Test
+    @DisplayName("updatePost: 없는 ID면 IllegalArgumentException 발생")
+    void updatePost_notFound() {
+        // given findById → 빈 Optional
+        given(postRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // When / Then
+        assertThatThrownBy(() -> postService.updatePost(123L, new PostUpdateRequest()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
 }

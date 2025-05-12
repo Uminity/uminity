@@ -1,6 +1,8 @@
 package com.gujo.uminity.post.service;
 
+import com.gujo.uminity.common.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
+import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.entity.Post;
@@ -12,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +24,7 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 
@@ -120,6 +125,35 @@ class PostServiceImplTest {
         // When / Then
         assertThatThrownBy(() -> postService.updatePost(123L, new PostUpdateRequest()))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("listPosts: SEARCH_TYPE=ALL알 때 검색 호출")
+    void listPosts_allSearch() {
+        // Given: ALL 검색일 때 두 필드 OR 검색
+        PostListRequest req = new PostListRequest();
+        req.setKeyword("키워드");
+        req.setPage(0);
+        req.setSize(10);
+        req.setSearchType(PostListRequest.SearchType.ALL);
+
+        Page<Post> stubPage = new PageImpl<>(
+                List.of(postTest),
+                PageRequest.of(0, 10, Sort.by("createdAt").descending()),
+                1
+        );
+        given(postRepository
+                .findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+                        eq("키워드"), eq("키워드"), any(Pageable.class)))
+                .willReturn(stubPage);
+
+        // When
+        PageResponse<PostResponseDto> page = postService.listPosts(req);
+
+        // Then: totalElements, DTO 매핑 검증
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getPostId())
+                .isEqualTo(postTest.getPostId());
     }
 
 }

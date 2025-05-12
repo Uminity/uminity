@@ -33,6 +33,18 @@ class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("저장하고 조회까지")
+    void 저장조회() {
+        Post p = new Post(null, UUID.randomUUID(), "테스트제목", "테스트 내용", now(), 0);
+        Post saved = postRepository.save(p);
+
+        Post found = postRepository.findById(saved.getPostId())
+                .orElseThrow(() -> new AssertionError("조회안됨"));
+        assertThat(found.getTitle()).isEqualTo("테스트제목");
+        assertThat(found.getContent()).isEqualTo("테스트 내용");
+    }
+
+    @Test
     @DisplayName("제목 포함 검색, 페이징이 정상")
     void 제목() {
 

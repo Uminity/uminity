@@ -1,7 +1,6 @@
 package com.gujo.uminity.post.service;
 
-import com.gujo.uminity.common.PageResponse;
-import com.gujo.uminity.post.dto.request.PostListRequest;
+import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
@@ -12,16 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
 
-import java.util.List;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -33,42 +29,33 @@ class PostServiceImplTest {
     @InjectMocks
     private PostServiceImpl postService;
 
-    private Pageable pageable;
+    private UUID userId;
+    private Post postTest;
 
     @BeforeEach
     void 설정() {
-        pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        userId = UUID.randomUUID();
+        postTest = new Post(1L, userId,
+                "테스트 제목,", "테스트 내용", now(), 0);
     }
 
     @Test
-    @DisplayName("DTO 매핑 검증 + 제목 or 내용")
-    void ALL() {
+    @DisplayName("create 저장된 엔티티를 DTO로 반환")
+    void createPost_success() {
         // given
-        Post p1 = new Post(1L, UUID.randomUUID(), "제목1", "내용1", now(), 0);
-        Post p2 = new Post(2L, UUID.randomUUID(), "제목2", "내용2", now(), 4);
-        Page<Post> fake = new PageImpl<>(List.of(p1, p2), pageable, 2);
+        PostCreateRequest req = new PostCreateRequest();
+        req.setTitle("제목");
+        req.setContent("내용");
 
-        given(postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                "test", "test", pageable))
-                .willReturn(fake);
-
-        PostListRequest req = new PostListRequest();
-        req.setKeyword("test");
-        req.setSearchType(PostListRequest.SearchType.ALL);
-        req.setPage(0);
-        req.setSize(10);
-
+        given(postRepository.save(any(Post.class)))
+                .willReturn(postTest);
         // when
-        PageResponse<PostResponseDto> response = postService.listPosts(req);
+        PostResponseDto dto = postService.createPost(req);
 
         // then
-        assertThat(response.getTotalElements()).isEqualTo(2);
-        assertThat(response.getContent()).extracting(PostResponseDto::getPostId)
-                .containsExactly(1L, 2L);
-        assertThat(response.getPage()).isEqualTo(0);
-        assertThat(response.getSize()).isEqualTo(10);
-
-        then(postRepository).should(times(1))
-                .findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase("test", "test", pageable);
+        assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
     }
+    /*
+    서비스 -> 레포지토리 -> DTO 매핑 순서
+     */
 }

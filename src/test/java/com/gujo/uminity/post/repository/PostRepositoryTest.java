@@ -1,6 +1,7 @@
 package com.gujo.uminity.post.repository;
 
 import com.gujo.uminity.post.entity.Post;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
@@ -21,12 +23,18 @@ class PostRepositoryTest {
     @Autowired
     private PostRepository postRepository;
 
+    @BeforeEach
+    void setUp() {
+        postRepository.saveAll(List.of(
+                new Post(null, UUID.randomUUID(), "제목1", "내용1", now(), 0),
+                new Post(null, UUID.randomUUID(), "제목2", "내용2", now(), 0),
+                new Post(null, UUID.randomUUID(), "제목3", "내용3", now(), 0)
+        ));
+    }
+
     @Test
     @DisplayName("제목 포함 검색, 페이징이 정상")
     void 제목() {
-        postRepository.save(new Post(null, UUID.randomUUID(), "제목1", "내용1", now(), 0));
-        postRepository.save(new Post(null, UUID.randomUUID(), "제목2", "내용2", now(), 0));
-        postRepository.save(new Post(null, UUID.randomUUID(), "제목3", "내용3", now(), 0));
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by("createdAt").descending());
 
@@ -37,6 +45,20 @@ class PostRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
 
         assertThat(page.getContent()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("제목 내용 포함 검색, 페이징이 정상")
+    void 제목내용() {
+
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("createdAt").descending());
+
+        Page<Post> page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase("제목", "내용", pageable);
+
+        assertThat(page.getTotalElements()).isEqualTo(3);
+        assertThat(page.getTotalPages()).isEqualTo(1);
+
+        assertThat(page.getContent()).hasSize(3);
     }
 }
 

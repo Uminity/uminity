@@ -1,11 +1,11 @@
 package com.gujo.uminity.auth.dto;
 
 import com.gujo.uminity.common.ResultStatus;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
+@Builder
 @Getter
-@Setter
 public class RegisterResponseDto {
 
     private ResultStatus result;

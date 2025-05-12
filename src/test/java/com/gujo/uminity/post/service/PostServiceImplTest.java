@@ -12,10 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 
@@ -40,7 +42,7 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("create 저장된 엔티티를 DTO로 반환")
+    @DisplayName("createPost: 저장된 엔티티를 DTO로 반환")
     void createPost_success() {
         // given
         PostCreateRequest req = new PostCreateRequest();
@@ -58,4 +60,32 @@ class PostServiceImplTest {
     /*
     서비스 -> 레포지토리 -> DTO 매핑 순서
      */
+
+    @Test
+    @DisplayName("getPost: 존재하는 ID면 DTO 반환")
+    void getPost_success() {
+        // given: findById(1L) 이 postTest 를 반환
+        given(postRepository.findById(1L))
+                .willReturn(Optional.of(postTest));
+
+        // when: 서비스 호출
+        PostResponseDto dto = postService.getPost(1L);
+
+        // then: DTO 필드가 postTest 와 일치
+        assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
+        assertThat(dto.getTitle()).isEqualTo(postTest.getTitle());
+    }
+
+    @Test
+    @DisplayName("getPost: 없는 ID면 IllegalArgumentException 발생")
+    void getPost_notFound() {
+        // given: findById(any) 이 빈 Optional
+        given(postRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // When / Then: 예외 던짐
+        assertThatThrownBy(() -> postService.getPost(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("존재하지 않는 게시글");
+    }
 }

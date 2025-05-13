@@ -1,10 +1,12 @@
 package com.gujo.uminity.post.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class PostUpdateRequest {
     @NotBlank(message = "제목을 반드시 입력하세요")

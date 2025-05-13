@@ -1,11 +1,21 @@
 package com.gujo.uminity.post.service;
 
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
+import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 
 public interface PostService {
     PageResponse<PostResponseDto> listPosts(PostListRequest req);
+
+    PostResponseDto getPost(Long postId);
+
+    PostResponseDto createPost(PostCreateRequest request);
+
+    PostResponseDto updatePost(Long postId, PostUpdateRequest request);
+
+    void deletePost(Long postId);
 }
 
 /*

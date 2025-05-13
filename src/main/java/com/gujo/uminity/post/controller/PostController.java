@@ -1,7 +1,9 @@
 package com.gujo.uminity.post.controller;
 
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
+import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
 import jakarta.validation.Valid;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -22,21 +26,41 @@ public class PostController {
     @GetMapping
     public ResponseEntity<PageResponse<PostResponseDto>> listPosts(
             @Valid @ModelAttribute PostListRequest req) {
-        PageResponse<PostResponseDto> result = postService.listPosts(req);
-        return ResponseEntity.ok(result);
+        PageResponse<PostResponseDto> page = postService.listPosts(req);
+        return ResponseEntity.ok(page);
+//        return ResponseEntity.ok().body(page);
     }
 
     // 2. 단건
-//    @GetMapping("/{postId}")
-//    public ResponseEntity<PostResponseDto> getPost(@PathVariable("postId") Long postId) {
-//    }
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> getPost(
+            @PathVariable("postId") Long postId) {
+        PostResponseDto dto = postService.getPost(postId);
+        return ResponseEntity.ok(dto);
+    }
 
     // 3. 게시글 생성
-//    @PostMapping
-
+    @PostMapping
+    public ResponseEntity<PostResponseDto> createPost(
+            @Valid @RequestBody PostCreateRequest req) {
+        PostResponseDto created = postService.createPost(req);
+        return ResponseEntity
+                .created(URI.create("/api/posts/" + created.getPostId()))
+                .body(created);
+    }
 
     // 4. 게시그 ㄹ수정
-//    @PutMapping
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> updatePost(
+            @PathVariable Long postId, @Valid @RequestBody PostUpdateRequest req) {
+        PostResponseDto updated = postService.updatePost(postId, req);
+        return ResponseEntity.ok(updated);
+    }
 
     // 5. 게시글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+        postService.deletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
 }

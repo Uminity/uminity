@@ -17,7 +17,7 @@ public class PostLike {
 
     @Id
     @Column(name = "user_id")
-    private UUID userId;
+    private String userId;
 
     @Id
     @Column(name = "post_id")

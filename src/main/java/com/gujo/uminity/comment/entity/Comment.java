@@ -36,7 +36,6 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
-    // parent 필드가 null이면 최상위 댓글이고 답글은 parent가 가리키는 댓글의 children 리스트에 추가한다.
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
@@ -47,4 +46,14 @@ public class Comment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }
+
+/*
+배운 정보
+자기 참조 트리 = 부모 자식 간의 관계로 부모에서 분리된 자식은 바로 삭제
+parent 필드가 null 이면 최상위 댓글이고 답글은 parent가 가리키는 댓글의 children 리스트에 추가한다.
+내용과 날짜는 필수값
+
+어떤 게시글의 댓글인지, 어떤 사용자인지, 부모댓글과 대댓글 구현
+
+ */
 

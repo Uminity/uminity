@@ -7,6 +7,8 @@ import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
+import com.gujo.uminity.user.entity.User;
+import com.gujo.uminity.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     @Override
     public PageResponse<PostResponseDto> listPosts(PostListRequest req) {
@@ -71,11 +74,24 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponseDto createPost(PostCreateRequest request) {
-        Post post = new Post();
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
-        post.setCreatedAt(LocalDateTime.now());
-        post.setViewCnt(0);
+
+        // 유저 조회부터 해야됨
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
+
+//        Post post = new Post();
+//        post.setTitle(request.getTitle());
+//        post.setContent(request.getContent());
+//        post.setCreatedAt(LocalDateTime.now());
+//        post.setViewCnt(0);
+
+        Post post = Post.builder()
+                .user(user)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .createdAt(now())
+                .viewCnt(0)
+                .build();
 
         Post saved = postRepository.save(post);
         return PostResponseDto.fromEntity(saved);
@@ -102,4 +118,6 @@ CRUD 만들고 났고 조회랑 수정은 있는지 여부를 확인해야되고
 그리고 응답객체에 post 빌더패턴으로 생성해서 넣어주기
 
 JPA 작업을 하나의 트랜잭션으로 묶고 자동으로 롤백해서
+
+연관관계로 UserRepository 추가해서 반영
  */

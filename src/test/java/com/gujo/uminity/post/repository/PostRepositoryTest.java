@@ -1,6 +1,8 @@
 package com.gujo.uminity.post.repository;
 
 import com.gujo.uminity.post.entity.Post;
+import com.gujo.uminity.user.entity.User;
+import com.gujo.uminity.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,20 +23,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PostRepositoryTest {
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    private User userTest;
 
     @BeforeEach
     void setUp() {
+        userTest = userRepository.save(User.builder()
+                .name("테스트")
+                .email("test@test.com")
+                .password("password")
+                .phone("010-111-1111")
+                .build()
+        );
         postRepository.saveAll(List.of(
-                new Post(null, UUID.randomUUID(), "제목1", "내용1", now(), 0),
-                new Post(null, UUID.randomUUID(), "제목2", "내용2", now(), 0),
-                new Post(null, UUID.randomUUID(), "제목3", "내용3", now(), 0)
+                new Post(null, userTest, "제목1", "내용1", now(), 0),
+                new Post(null, userTest, "제목2", "내용2", now(), 0),
+                new Post(null, userTest, "제목3", "내용3", now(), 0)
         ));
     }
 
     @Test
     @DisplayName("저장하고 조회까지")
     void 저장조회() {
-        Post p = new Post(null, UUID.randomUUID(), "테스트제목", "테스트 내용", now(), 0);
+        Post p = new Post(null, userTest, "테스트제목", "테스트 내용", now(), 0);
         Post saved = postRepository.save(p);
 
         Post found = postRepository.findById(saved.getPostId())

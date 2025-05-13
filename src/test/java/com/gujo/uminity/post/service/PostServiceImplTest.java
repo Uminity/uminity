@@ -7,6 +7,8 @@ import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
+import com.gujo.uminity.user.entity.User;
+import com.gujo.uminity.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,19 +35,36 @@ class PostServiceImplTest {
 
     @Mock
     private PostRepository postRepository;
+
+    @Mock
+    private UserRepository userRepository;
     // 가짜 수집
 
     @InjectMocks
     private PostServiceImpl postService;
 
-    private UUID userId;
+
+    private User userTest;
     private Post postTest;
 
     @BeforeEach
     void 설정() {
-        userId = UUID.randomUUID();
-        postTest = new Post(1L, userId,
-                "테스트 제목,", "테스트 내용", now(), 0);
+        // 작성자
+        userTest = User.builder()
+                .userId(String.valueOf(UUID.randomUUID()))
+                .name("테스트 유저")
+                .email("test@tset.com")
+                .password("password")
+                .phone("010-1111-1111")
+                .build();
+        postTest = Post.builder()
+                .postId(1L)
+                .user(userTest)
+                .title("타이틀 제목")
+                .content("내용")
+                .createdAt(now())
+                .viewCnt(0)
+                .build();
     }
 
     @Test
@@ -53,8 +72,12 @@ class PostServiceImplTest {
     void createPost_success() {
         // given
         PostCreateRequest req = new PostCreateRequest();
+        req.setUserId(userTest.getUserId());
         req.setTitle("제목");
         req.setContent("내용");
+
+        given(userRepository.findById(userTest.getUserId()))
+                .willReturn(Optional.of(userTest));
 
         given(postRepository.save(any(Post.class)))
                 .willReturn(postTest);
@@ -63,6 +86,9 @@ class PostServiceImplTest {
 
         // then
         assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
+
+        assertThat(dto.getAuthorName()).isEqualTo(postTest.getUser().getName());
+        assertThat(dto.getAuthorName()).isEqualTo(userTest.getName());
     }
     /*
     서비스 -> 레포지토리 -> DTO 매핑 순서

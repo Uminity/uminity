@@ -4,9 +4,9 @@ import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "comments")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -46,6 +45,13 @@ public class Comment {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public void updateContent(String newContent) {
+        if (newContent == null || newContent.isBlank()) {
+            throw new IllegalArgumentException("댓글 내용은 비어 있을 수 없습니다.");
+        }
+        this.content = newContent;
+    }
 }
 
 /*

@@ -23,6 +23,7 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+
     @Column(nullable = false)
     private String title;
 

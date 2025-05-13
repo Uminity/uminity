@@ -1,4 +1,4 @@
-package com.gujo.uminity.user.dto;
+package com.gujo.uminity.auth.dto;
 
 import com.gujo.uminity.user.entity.Role;
 import java.util.ArrayList;
@@ -6,13 +6,13 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
 @Builder
-public class UserDto {
+@Getter
+public class LoginResponseDto {
 
     private String userId;
-    private String name;
     private String email;
+    private String name;
     private String phone;
     private List<Role> roles = new ArrayList<>();
 }

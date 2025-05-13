@@ -1,5 +1,6 @@
 package com.gujo.uminity.comment.dto.response;
 
+import com.gujo.uminity.comment.entity.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,6 +13,15 @@ public class ChildCommentDto {
     private String userName;
     private String content;
     private LocalDateTime createdAt;
+
+    public static ChildCommentDto fromEntity(Comment c) {
+        return new ChildCommentDto(
+                c.getCommentId(),
+                c.getUser().getName(),
+                c.getContent(),
+                c.getCreatedAt()
+        );
+    }
 }
 
 /*

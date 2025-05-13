@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 
 public class PostResponseDto {
     private Long postId;
+    private String authorName;
     private String title;
     private String content;
     private LocalDateTime createdAt;
@@ -19,6 +20,7 @@ public class PostResponseDto {
     public static PostResponseDto fromEntity(Post p) {
         return PostResponseDto.builder()
                 .postId(p.getPostId())
+                .authorName(p.getUser().getName())
                 .title(p.getTitle())
                 .content(p.getContent())
                 .createdAt(p.getCreatedAt())
@@ -28,7 +30,7 @@ public class PostResponseDto {
 }
 
 /*
-서버 생성값 Id, 시간, 조회수
-클라이언트 입력 값 제목, 내용
+서버 생성값 postId, 시간, 조회수
+클라이언트 입력 값 제목, 내용 + user 엔티티의 아이디
 컨트롤러가 해당 DTO를 JSON 으로 응답
  */

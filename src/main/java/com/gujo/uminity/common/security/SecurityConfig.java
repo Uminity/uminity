@@ -2,6 +2,7 @@ package com.gujo.uminity.common.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,11 +17,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            MyAuthenticationSuccessHandler successHandler, MyAuthenticationFailureHandler failureHandler) throws Exception {
 
+
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/**").permitAll()
                 .requestMatchers("/login.html").hasRole("USER")
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
+
 
         http.csrf(AbstractHttpConfigurer::disable);
 

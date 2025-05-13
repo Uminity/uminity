@@ -13,14 +13,26 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           MyAuthenticationSuccessHandler successHandler, MyAuthenticationFailureHandler failureHandler) throws Exception {
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/login", "/login.html", "/register", "/register.html").permitAll()
+                .requestMatchers("/**").permitAll()
+                .requestMatchers("/login.html").hasRole("USER")
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
         http.csrf(AbstractHttpConfigurer::disable);
+
+        http.formLogin(form -> form
+                .loginPage("/login.html")
+                .loginProcessingUrl("/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .successHandler(successHandler)
+                .failureHandler(failureHandler)
+                .permitAll()
+        );
 
         return http.build();
     }

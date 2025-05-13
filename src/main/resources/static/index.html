@@ -210,9 +210,9 @@
 
             let url = "/api/posts";
             let urlParams = "?page=" + PAGE +
-			                "&size=" + SIZE +
-			                "&searchType=" + SEARCH_TYPE +
-			                "&keyword=" + encodeURIComponent(SEARCH_WORD);
+                "&size=" + SIZE +
+                "&searchType=" + SEARCH_TYPE +
+                "&keyword=" + encodeURIComponent(SEARCH_WORD);
 
             let response = await fetch(url + urlParams); // api 호출
 
@@ -222,7 +222,10 @@
                 console.log(data);
                 let posts = data.content; // post 목록
                 TOTAL_POST_COUNT = posts.totalElements; // 전체 게시글 수
+
+                console.log(data.totalElements);
                 PAGE_LINK_COUNT = data.totalPages;
+
 
                 makeListHtml(posts); // 게시글 부분
                 addPagination(); // 페이지네이션 부분
@@ -241,7 +244,7 @@
 					<tr>
 						<td class="text-center">${post.postId}</td>
 						<td><a href="#" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
-						<td class="text-center">${post.authorName}</td>
+						<td class="text-center">${post.authName}</td>
 						<td class="text-center">${post.createdAt}</td>
 						<td class="text-center">${post.viewCnt}</td>
 					</tr>

@@ -58,10 +58,10 @@ public class PostController {
     HTTP 요청 본문에 사용자 ID를 담지 않고, 시큐리티 컨텍스트로부터 꺼내오도록 해야 위·변조를 방지할 수 있다!!!!!!!!!!!!
      */
 
-    // 4. 게시그 ㄹ수정
+    // 4. 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<PostResponseDto> updatePost(
-            @PathVariable Long postId, @Valid @RequestBody PostUpdateRequest req,
+            @PathVariable("postId") Long postId, @Valid @RequestBody PostUpdateRequest req,
             @AuthenticationPrincipal MyUserDetails principal) {
 
         String userId = principal.getUserId();
@@ -73,7 +73,7 @@ public class PostController {
     // 5. 게시글 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
-            @PathVariable Long postId, @AuthenticationPrincipal MyUserDetails principal) {
+            @PathVariable("postId") Long postId, @AuthenticationPrincipal MyUserDetails principal) {
         postService.deletePost(postId, principal.getUserId());
         return ResponseEntity.noContent().build();
     }

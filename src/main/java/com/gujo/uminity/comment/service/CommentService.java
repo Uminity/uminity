@@ -12,12 +12,13 @@ public interface CommentService {
 
     CommentResponseDto createComment(Long postId, CommentCreateRequest req, String userId);
 
-    CommentResponseDto updateComment(Long commentId, CommentUpdateRequest req, String userId);
+    CommentResponseDto updateComment(Long postId, Long commentId, CommentUpdateRequest req, String userId);
 
-    void deleteComment(Long commentId, String userId);
+    void deleteComment(Long postId, Long commentId, String userId);
 
 }
 
 /*
 userId 인증 사용자 정보를 서비스 계층에서 받는다.
+URI로 넘어온 postId 또한 게시글ID와 댓글소속의 ID검증할 수 잇게
  */

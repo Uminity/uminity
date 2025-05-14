@@ -54,7 +54,7 @@ public class CommentController {
             @Valid @RequestBody CommentUpdateRequest req,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
-        CommentResponseDto updated = commentService.updateComment(commentId, req, principal.getUserId());
+        CommentResponseDto updated = commentService.updateComment(postId, commentId, req, principal.getUserId());
         return ResponseEntity.ok(updated);
     }
 
@@ -65,7 +65,13 @@ public class CommentController {
             @PathVariable Long commentId,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
-        commentService.deleteComment(commentId, principal.getUserId());
+        commentService.deleteComment(postId, commentId, principal.getUserId());
         return ResponseEntity.noContent().build();
     }
+
+    /*
+    잘못된 URI 사용을 방지하기 위해 postId를 넣어줘서 존재하지 않는 댓글이랑
+    게시글에 속하지않는 댓글을 구분해서 404와 400 을 구분하자
+
+     */
 }

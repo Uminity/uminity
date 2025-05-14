@@ -93,29 +93,35 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto updateComment(Long commentId, CommentUpdateRequest req, String userId) {
+    public CommentResponseDto updateComment(Long postId, Long commentId, CommentUpdateRequest req, String userId) {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글: " + commentId));
 
-        // 권한 검증
+        if (!comment.getPost().getPostId().equals(postId)) {
+            throw new IllegalArgumentException("해당 게시글에 존재하지 않는 댓글입니다.");
+        }
+
         if (!comment.getUser().getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
         }
 
         comment.updateContent(req.getContent());
-
         return mapToCommentDto(comment);
     }
 
     @Override
     @Transactional
-    public void deleteComment(Long commentId, String userId) {
+    public void deleteComment(Long postId, Long commentId, String userId) {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글: " + commentId));
 
-        // 권한 검증
+
+        if (!comment.getPost().getPostId().equals(postId)) {
+            throw new IllegalArgumentException("해당 게시글에 존재하지 않는 댓글입니다.");
+        }
+
         if (!comment.getUser().getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }

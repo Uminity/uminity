@@ -9,9 +9,6 @@ import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -136,34 +133,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void incrementViewCount(Long postId, HttpServletRequest request, HttpServletResponse response) {
+    public void incrementViewCount(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+        // 엔티티 성공적으로 로드하면 +1해주자
         post.setViewCnt(post.getViewCnt() + 1);
-
-        // 쿠키에서 viewPosts를 가져오기
-        Cookie[] cookies = request.getCookies();
-        String viewed = "";
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("viewdPosts".equals(c.getName())) {
-                    viewed = c.getValue();
-                }
-            }
-        }
-        // 아직 안본 게시글 - postId가 포함안되어있으면
-        String marker = "[" + postId + "]";
-        if (!viewed.contains(marker)) {
-            post.setViewCnt(post.getViewCnt() + 1);
-            postRepository.save(post);
-
-            // 쿠키에 유효기간 설정
-            Cookie newCookie = new Cookie("viewPosts", viewed + marker);
-            newCookie.setPath("/");
-            newCookie.setMaxAge(60 * 3); // 일단 3분
-            response.addCookie(newCookie);
-
-        }
+        // 트랜잭션 커밋시 반영
     }
 }
 

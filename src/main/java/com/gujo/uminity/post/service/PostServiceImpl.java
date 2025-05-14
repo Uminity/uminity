@@ -73,6 +73,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponseDto createPost(PostCreateRequest request) {
 
         // 유저 조회부터 해야됨
@@ -98,6 +99,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponseDto updatePost(Long postId, PostUpdateRequest request) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 압ㅎ습니다"));
@@ -108,6 +110,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
     }

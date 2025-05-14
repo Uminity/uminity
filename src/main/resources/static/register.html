@@ -2,126 +2,153 @@
 <html>
 
 <head>
-	<meta charset="UTF-8">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-		crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="assets/css/style.css">
-	<link rel="icon" type="image/png" href="assets/images/favicon.png">
-	<title>Uminity</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <title>Uminity</title>
 </head>
 
 <body>
-	<div class="d-flex justify-content-center align-items-center vh-100">
-		<div class="container card mt-5 mb-5 shadow rounded-4 " style="max-width: 600px;">
-			<div class="card-body p-4">
-				<h2 class="text-center text-primary mb-4">회원가입</h2>
-				<form novalidate>
-					<div class="mb-3">
-						<label for="name" class="form-label">이름</label>
-						<input type="text" id="name" name="name" class="form-control form-control-lg rounded-3"
-							placeholder="홍길동">
-						<div class="valid-feedback"></div>
-						<div class="invalid-feedback">이름을 입력하세요.</div>
-					</div>
-					<div class="mb-3">
-						<label for="email" class="form-label">이메일</label>
-						<input type="email" id="email" name="email" class="form-control form-control-lg rounded-3"
-							placeholder="hong@gildong.com">
-						<div class="valid-feedback"></div>
-						<div class="invalid-feedback">이메일 형식으로 입력하세요.</div>
-					</div>
-					<div class="mb-3">
-						<label for="password" class="form-label">암호</label>
-						<input type="password" id="password" name="password"
-							class="form-control form-control-lg rounded-3" placeholder="password">
-						<div class="valid-feedback"></div>
-						<div class="invalid-feedback">암호를 입력하세요.</div>
-					</div>
-					<div class="mb-3">
-						<label for="phoneNumber" class="form-label">전화번호</label>
-						<input type="text" id="phoneNumber" name="phoneNumber"
-							class="form-control form-control-lg rounded-3" placeholder="01012345678">
-						<div class="valid-feedback"></div>
-						<div class="invalid-feedback">11자리 전화번호를 입력하세요.</div>
-					</div>
-					<div class="d-grid">
-						<button type="button" class="btn btn-primary btn-lg rounded-pill" id="btnRegister">회원가입</button>
-					</div>
-				</form>
-				<div class="text-center mt-4">
-					<a href="/" class="text-muted text-decoration-none">← 뒤로가기</a>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="container card mt-5 mb-5 shadow rounded-4 " style="max-width: 600px;">
+            <div class="card-body p-4">
+                <h2 class="text-center text-primary mb-4">회원가입</h2>
+                <form novalidate>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">이름</label>
+                        <input type="text" id="name" name="name" class="form-control form-control-lg rounded-3"
+                               placeholder="홍길동">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">이름을 입력하세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">이메일</label>
+                        <input type="email" id="email" name="email" class="form-control form-control-lg rounded-3"
+                               placeholder="hong@gildong.com">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">이메일 형식으로 입력하세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">암호</label>
+                        <input type="password" id="password" name="password"
+                               class="form-control form-control-lg rounded-3" placeholder="pw">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">암호를 입력하세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">전화번호</label>
+                        <input type="text" id="phoneNumber" name="phoneNumber"
+                               class="form-control form-control-lg rounded-3" placeholder="010-1234-5678">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">형식에 맞게 전화번호를 입력하세요.</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary btn-lg rounded-pill" id="btnRegister">회원가입</button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <a href="/" class="text-muted text-decoration-none">← 뒤로가기</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<script>
-		window.onload = function () {
-			document.querySelector("#btnRegister").onclick = function () {
-				// Validate
-				if (document.querySelector("foem .is-invalid").length > 0) {
-					alert("입력이 올바르지 않습니다.");
-				} else {
-					register();
-				}
-			}
-		}
+    <script>
+        window.onload = function () {
+            document.querySelector("#btnRegister").onclick = function () {
+                // Validate: .is-invalid 필드가 하나라도 있는지 체크
+                const invalidCount = document.querySelectorAll("form .is-invalid").length;
+                if (invalidCount > 0) {
+                    alert("입력이 올바르지 않습니다.");
+                } else {
+                    register();
+                }
+            };
+        };
 
-		async function register() {
-			let name = document.querySelector("#name").value;
-			let email = document.querySelector("#email").value;
-			let password = document.querySelector("#password").value;
-			let phoneNumber = document.querySelector("#phoneNumber").value;
+        async function register() {
+            let name = document.querySelector("#name").value;
+            let email = document.querySelector("#email").value;
+            let password = document.querySelector("#password").value;
+            let phone = document.querySelector("#phoneNumber").value;
 
-			alert(name, email, password, phoneNumber + "회원가입")
-		}
+            let payload = {name, email, password, phone};
+
+            try {
+                const res = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert("회원가입이 완료되었습니다. 메인 페이지로 이동합니다.");
+                    window.location.href = "/";
+                } else {
+                    document.getElementById("error-message").textContent =
+                        data.message || "회원가입에 실패했습니다.";
+                    alert("회원가입에 실패했습니다.");
+                }
+            } catch (e) {
+                document.getElementById("error-message").textContent =
+                    "서버와 통신 중 오류가 발생했습니다.";
+                console.error(e);
+            }
+        }
+
+        // 필드값 검증
+        // valid 클래스 토글 함수 (if isValid == true : is-valid else is-invalid)
+        function toggleValidation(element, isValid) {
+            element.classList.remove("is-valid", "is-invalid");
+            element.classList.add(isValid ? "is-valid" : "is-invalid");
+        }
+
+        // 검증
+        document.querySelector("#name").onblur = function () {
+            toggleValidation(this, validateName(this.value));
+        }
+        document.querySelector("#email").onblur = function () {
+            toggleValidation(this, validateEmail(this.value));
+        }
+        document.querySelector("#password").onblur = function () {
+            toggleValidation(this, validatePassword(this.value));
+        }
+        document.querySelector("#phoneNumber").onblur = function () {
+            toggleValidation(this, validatePhoneNumber(this.value));
+        }
 
 
-		// 필드값 검증
+        // 검증 로직
+        // 이름: 1글자 이상
+        function validateName(name) {
+            return name.trim().length >= 1;
+        }
 
-		// valid 클래스 토글 함수 (if isValid == true : is-valid else is-invalid)
-		function toggleValidation(element, isValid) {
-			element.classList.remove("is-valid", "is-invalid");
-			element.classList.add(isValid ? "is-valid" : "is-invalid");
-		}
+        // 이메일: hong@gildong.com 형식
+        function validateEmail(email) {
+            let regexp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+            return regexp.test(email)
+        }
 
-		// 검증
-		document.querySelector("#name").onblur = function () {
-			toggleValidation(this, validateName(this.value));
-		}
-		document.querySelector("#email").onblur = function () {
-			toggleValidation(this, validateEmail(this.value));
-		}
-		document.querySelector("#password").onblur = function () {
-			toggleValidation(this, validatePassword(this.value));
-		}
-		document.querySelector("#phoneNumber").onblur = function () {
-			toggleValidation(this, validatePhoneNumber(this.value));
-		}
+        // 암호: 1글자 이상
+        function validatePassword(password) {
+            return password.trim().length >= 1;
+        }
 
+        // 전화번호: 11자리 숫자
+        function validatePhoneNumber(phoneNumber) {
+            return /^01[0-9]-\d{4}-\d{4}$/.test(phoneNumber);
 
-		// 검증 로직
-		// 이름: 1글자 이상
-		function validateName(name) {
-			return name.trim().length >= 1;
-		}
-		// 이메일: hong@gildong.com 형식
-		function validateEmail(email) {
-			let regexp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
-			return regexp.test(email)
-		}
-		// 암호: 1글자 이상
-		function validatePassword(password) {
-			return password.trim().length >= 1;
-		}
-		// 전화번호: 11자리 숫자
-		function validatePhoneNumber(phoneNumber) {
-			return /^\d{11}$/.test(phoneNumber);
-		}
-	</script>
+        }
+    </script>
 </body>
-
 </html>

@@ -3,9 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+          rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
@@ -14,50 +16,24 @@
 
 <body>
 
-    <!-- navbar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container">
-            <a class="navbar-brand" href="#">Uminity</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item" id="navUser" style="display:none;">
-                        <span class="nav-link"></span>
-                    </li>
-                </ul>
+    <!-- ① navbar -->
+    <div id="nav-placeholder" class="pb-5"></div>
 
-                <!-- Right: Login / Logout -->
-                <ul class="navbar-nav mb-2 mb-lg-0">
-                    <!-- 로그인 전에만 보이는 버튼 -->
-                    <li class="nav-item" id="navLogin">
-                        <a class="nav-link active" href="/login">Login</a>
-                    </li>
-                    <!-- 로그인 후에만 보이는 버튼 -->
-                    <li class="nav-item" id="navLogout" style="display:none;">
-                        <a class="nav-link active" href="#" id="linkLogout">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- ② Hot Issues -->
+    <div class="container mb-4">
+        <h4 class="text-danger fw-bold mb-3">🔥 Hot Issues</h4>
+        <ul class="list-group" id="hotList">
+            <!-- JS가 상위 3개 글을 여기다 삽입합니다 -->
+        </ul>
+    </div>
 
-    <!-- 게시판 -->
-    <div class="container mt-5">
-        <h2 class="text-center text-primary fw-bold mb-4"><a href="/">유미니티 게시판</a></h2>
-
-        <div class="row">
-            <!-- 페이지네이션 설정 -->
+    <!-- ③ 게시판 -->
+    <div class="container">
+        <div class="row mb-3">
             <div class="col">
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        옵션
+                    <button class="btn btn-primary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">옵션
                     </button>
                     <ul class="dropdown-menu" id="pageOptionMenu">
                         <li><a class="dropdown-item" href="#" data-value="3">3개씩 보기</a></li>
@@ -66,29 +42,22 @@
                     </ul>
                 </div>
             </div>
-
-            <!-- 게시글 검색 -->
             <div class="input-group col mb-3">
-                <!-- 드롭다운 -->
-                <div class="input-group-prepend">
-                    <button class="btn btn-outline-secondary dropdown-toggle" id="searchTypeButton" type="button" data-bs-toggle="dropdown" aria-expanded="false">제목</button>
-                    <ul class="dropdown-menu" id="searchType">
-                        <li><a class="dropdown-item" href="#" data-value="TITLE">제목</a></li>
-                        <li><a class="dropdown-item" href="#" data-value="CONTENT">내용</a></li>
-                        <li><a class="dropdown-item" href="#" data-value="ALL">제목+내용</a></li>
-                    </ul>
-                </div>
+                <button class="btn btn-outline-secondary dropdown-toggle" id="searchTypeButton"
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">제목
+                </button>
+                <ul class="dropdown-menu" id="searchType">
+                    <li><a class="dropdown-item" href="#" data-value="TITLE">제목</a></li>
+                    <li><a class="dropdown-item" href="#" data-value="CONTENT">내용</a></li>
+                    <li><a class="dropdown-item" href="#" data-value="ALL">제목+내용</a></li>
+                </ul>
                 <input type="hidden" id="selectedSearchType" value="TITLE">
-                <!-- 검색 필드 -->
                 <input type="text" class="form-control" id="keyword" placeholder="검색어를 입력하세요">
-                <!-- 검색 버튼 -->
                 <button class="btn btn-primary" type="button" id="btnSearch">검색</button>
             </div>
         </div>
 
-
-        <!-- 게시판 -->
-        <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card shadow-sm rounded-4 mb-4 overflow-hidden">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                 <tr>
@@ -99,109 +68,106 @@
                     <th class="text-center">조회수</th>
                 </tr>
                 </thead>
-                <tbody id="postList">
-                <!-- 게시글 삽입 공간 -->
-                </tbody>
+                <tbody id="postList"></tbody>
             </table>
         </div>
 
-        <!-- 글작성 버튼 -->
-        <div class="d-flex justify-content-end">
-            <button class="btn btn-primary fw-bold rounded-3">글 작성</button>
+        <div class="d-flex justify-content-end mb-4">
+            <a href="/postForm" class="btn btn-primary fw-bold rounded-3">글 작성</a>
         </div>
 
-        <!-- 페이지네이션 -->
-        <div id="paginationWrapper">
-        </div>
+        <div id="paginationWrapper"></div>
     </div>
 
     <!-- footer -->
     <footer class="bg-light text-center text-lg-start mt-5 border-top">
         <div class="container p-4">
-            <p class="text-center mb-0 text-muted">
-                © 2025 Uminity. All rights reserved.
-            </p>
+            <p class="text-center mb-0 text-muted">© 2025 Uminity. All rights reserved.</p>
         </div>
     </footer>
 
     <script src="/assets/js/util.js"></script>
     <script>
-        let SIZE = 10;
-        let PAGE = 0;
-        let SEARCH_TYPE = 'TITLE';
-        let SEARCH_WORD = '';
-        let TOTAL_POST_COUNT = 0;
-
-        let PAGE_LINK_COUNT = 5;
-        let CURRENT_PAGE_INDEX = 1;
-
-
         window.onload = function () {
-            initUI();
-            postList();
-            document.getElementById("linkLogout")
-                .addEventListener("click", logout);
+            // 1) 공통 네비 로드
+            loadNavbar();
 
-            document.querySelector("#btnSearch").onclick = function () {
+            // 2) Hot Issues 데이터 로드 (조회수 내림차순 상위 3개)
+            fetch('/api/posts?page=0&size=3&sort=viewCnt,desc')
+                .then(res => res.json())
+                .then(data => {
+                    const hotList = document.getElementById('hotList');
+                    hotList.innerHTML = '';
+                    data.content.forEach(post => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        li.innerHTML = `
+              <a href="/postDetail/${post.postId}" class="text-decoration-none flex-grow-1">
+                ${post.title}
+              </a>
+              <span class="badge bg-danger rounded-pill">${post.viewCnt}</span>
+            `;
+                        hotList.appendChild(li);
+                    });
+                })
+                .catch(err => console.error('Hot Issues 로드 실패:', err));
+
+            // 3) 기존 검색·페이지 옵션 바인딩
+            document.getElementById("btnSearch").onclick = function () {
                 SEARCH_TYPE = document.querySelector("#selectedSearchType").value;
                 SEARCH_WORD = document.querySelector("#keyword").value;
                 postList();
-            }
-
-            document.querySelector("#linkLogout").onclick = logout;
-
-            // 검색 필드 드롭다운 선택 이벤트
+            };
             document.querySelectorAll("#searchType .dropdown-item").forEach(item => {
-                item.addEventListener("click", function (event) {
-                    event.preventDefault();
-                    const selectedValue = this.getAttribute("data-value");
-                    const displayText = this.textContent;
-
-                    // 버튼 텍스트 변경
-                    document.getElementById("searchTypeButton").textContent = displayText;
-
-                    // 히든 필드에 선택된 값 설정
-                    document.getElementById("selectedSearchType").value = selectedValue;
+                item.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.getElementById("searchTypeButton").textContent = this.textContent;
+                    document.getElementById("selectedSearchType").value = this.getAttribute("data-value");
                 });
             });
-
-            // 옵션 필드 드롭다운 선택 이벤트
             document.querySelectorAll("#pageOptionMenu .dropdown-item").forEach(item => {
-                item.addEventListener("click", function (event) {
-                    event.preventDefault();
-
-                    SIZE = parseInt(this.getAttribute("data-value"));
+                item.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    SIZE = +this.getAttribute("data-value");
                     PAGE = 0;
                     CURRENT_PAGE_INDEX = 1;
-
                     postList();
                 });
             });
-        }
 
-        // UI 초기화: 세션스토리지 user 확인 후 nav toggle
-        function initUI() {
-            const userJson = sessionStorage.getItem("user");
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                document.querySelector("#navUser .nav-link")
-                    .textContent = `${user.name}님 환영합니다.`;
-                showLoggedIn();
-            } else {
-                showLoginOnly();
-            }
-        }
+            // 4) 초기 전체 목록 호출
+            postList();
+        };
 
-        function showLoginOnly() {
-            document.getElementById("navLogin").style.display = "";
-            document.getElementById("navUser").style.display = "none";
-            document.getElementById("navLogout").style.display = "none";
-        }
+        let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'TITLE', SEARCH_WORD = '';
+        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 5, CURRENT_PAGE_INDEX = 1;
 
-        function showLoggedIn() {
-            document.getElementById("navLogin").style.display = "none";
-            document.getElementById("navUser").style.display = "";
-            document.getElementById("navLogout").style.display = "";
+        function postList() {
+            const url = "/api/posts"
+                + "?page=" + PAGE
+                + "&size=" + SIZE
+                + "&searchType=" + SEARCH_TYPE
+                + "&keyword=" + encodeURIComponent(SEARCH_WORD);
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById("postList");
+                    tbody.innerHTML = '';
+                    data.content.forEach(post => {
+                        tbody.innerHTML += `
+              <tr>
+                <td class="text-center">${post.postId}</td>
+                <td><a href="/postDetail/${post.postId}"
+                       class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
+                <td class="text-center">${post.authorName}</td>
+                <td class="text-center">${post.createdAt}</td>
+                <td class="text-center">${post.viewCnt}</td>
+              </tr>`;
+                    });
+                    makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX,
+                        data.totalElements, "paginationWrapper");
+                })
+                .catch(err => console.error("게시판 로드 실패:", err));
         }
 
 
@@ -221,11 +187,9 @@
                 let data = await response.json(); // json 변환
                 console.log(data);
                 let posts = data.content; // post 목록
+
                 TOTAL_POST_COUNT = posts.totalElements; // 전체 게시글 수
-
-                console.log(data.totalElements);
                 PAGE_LINK_COUNT = data.totalPages;
-
 
                 makeListHtml(posts); // 게시글 부분
                 addPagination(); // 페이지네이션 부분
@@ -239,13 +203,15 @@
         function makeListHtml(posts) {
             let postListDiv = document.querySelector("#postList");
             postListDiv.innerHTML = "";
-            posts.forEach((post, index) => {
+
+            posts.forEach(post => {
+                let postDate = formatDate(post.createdAt);
                 let tableHtml = `
 					<tr>
 						<td class="text-center">${post.postId}</td>
-						<td><a href="#" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
-						<td class="text-center">개발중</td>
-						<td class="text-center">${post.createdAt}</td>
+						<td><a href="/postDetail/${post.postId}" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
+						<td class="text-center">${post.authorName}</td>
+						<td class="text-center">${postDate}</td>
 						<td class="text-center">${post.viewCnt}</td>
 					</tr>
 				`;
@@ -259,40 +225,6 @@
             makePaginationHTML(SIZE, PAGE_LINK_COUNT, CURRENT_PAGE_INDEX, TOTAL_POST_COUNT, "paginationWrapper");
         }
 
-
-        function movePage(pageIndex) {
-            PAGE = pageIndex - 1;
-            CURRENT_PAGE_INDEX = pageIndex;
-            postList();
-        }
-
-
-        async function logout(e) {
-            e.preventDefault();
-
-            // 1) 서버에 로그아웃 요청 (세션 쿠키 포함)
-            try {
-                const res = await fetch("/logout", {
-                    method: "GET",              // 또는 POST로 설정한 경우 POST
-                    credentials: "include"      // ← 매우 중요: 세션 쿠키(JSESSIONID)를 서버에 전달
-                });
-                // 로그아웃 리스폰스를 JSON으로 파싱하지 않습니다.
-                if (!res.ok) {
-                    console.warn("서버 로그아웃 실패:", res.status);
-                }
-            } catch (err) {
-                console.error("서버 로그아웃 에러:", err);
-            }
-
-            // 2) 클라이언트 세션정보 지우기
-            sessionStorage.removeItem("user");
-
-            // 3) UI 초기화 (Login 버튼만 보이도록)
-            initUI();
-        }
-
-
     </script>
 </body>
-
 </html>

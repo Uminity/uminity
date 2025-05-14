@@ -1,5 +1,7 @@
 package com.gujo.uminity.post.service;
 
+import static java.time.LocalDateTime.now;
+
 import com.gujo.uminity.common.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -16,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +48,9 @@ public class PostServiceImpl implements PostService {
             case CONTENT:
                 postPage = postRepository.findByContentContainingIgnoreCase(keyword, pageable);
                 break;
+            case USERID:
+                postPage = postRepository.findByUser_UserIdOrderByCreatedAtDesc(keyword, pageable);
+                break;
             default:
                 postPage = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
                 break;
@@ -73,10 +76,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto createPost(PostCreateRequest request) {
-
+    @Transactional
+    public PostResponseDto createPost(PostCreateRequest request, String userId) {
+      
         // 유저 조회부터 해야됨
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
 
 //        Post post = new Post();
@@ -98,9 +102,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto updatePost(Long postId, PostUpdateRequest request) {
+    @Transactional
+    public PostResponseDto updatePost(Long postId, PostUpdateRequest request, String userId) {
+
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재 하지 압ㅎ습니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
+        }
+
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
 
@@ -108,8 +119,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePost(Long postId) {
-        postRepository.deleteById(postId);
+    @Transactional
+    public void deletePost(Long postId, String userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
+        }
+
+        postRepository.delete(post);
     }
 }
 

@@ -25,7 +25,7 @@ public class PostListRequest {
     private int size = 10;
 
     public enum SearchType {
-        TITLE, CONTENT, ALL;
+        TITLE, CONTENT, ALL, USERID;
     }
 }
 

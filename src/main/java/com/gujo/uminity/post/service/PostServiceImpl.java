@@ -1,5 +1,7 @@
 package com.gujo.uminity.post.service;
 
+import static java.time.LocalDateTime.now;
+
 import com.gujo.uminity.common.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -16,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +47,9 @@ public class PostServiceImpl implements PostService {
                 break;
             case CONTENT:
                 postPage = postRepository.findByContentContainingIgnoreCase(keyword, pageable);
+                break;
+            case USERID:
+                postPage = postRepository.findByUser_UserIdOrderByCreatedAtDesc(keyword, pageable);
                 break;
             default:
                 postPage = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);

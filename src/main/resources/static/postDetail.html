@@ -26,17 +26,13 @@
         <!-- 댓글 목록 -->
         <div class="mb-4">
             <h5>댓글 <strong>(2)</strong></h5>
+            <div class="input-group mb-3 p-2 rounded border">
+                <textarea class="form-control p-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3" style="resize: none;"></textarea>
+                <button class="btn btn-primary" id="commentSubmit" style="width: 120px;">등록</button>
+            </div>
             <div class="border rounded p-3 mb-3">
                 <p><strong>작성자명</strong> | 2025-05-13</p>
                 <p>댓글 내용이 여기에 표시됩니다.</p>
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-outline-primary btn-sm me-2">수정</button>
-                    <button class="btn btn-outline-danger btn-sm">삭제</button>
-                </div>
-            </div>
-            <div class="border rounded p-3 mb-3">
-                <p><strong>작성자명</strong> | 2025-05-12</p>
-                <p>또 다른 댓글 내용이 여기에 표시됩니다.</p>
                 <div class="d-flex justify-content-end">
                     <button class="btn btn-outline-primary btn-sm me-2">수정</button>
                     <button class="btn btn-outline-danger btn-sm">삭제</button>
@@ -59,12 +55,14 @@
     window.onload = function(){
     	loadNavbar();
     	postDetail();
+    	listComments();
+    	
     }
     
+    let postId = window.location.pathname.split("/").pop();
+    let PAGE = 0; let SIZE = 5;
+    
     async function postDetail(){
-    	let postId = window.location.pathname.split("/").pop();
-    	console.log(postId);
-    	
     	let response = await fetch("/api/posts/" + postId);
     	
     	if(response.ok){
@@ -102,6 +100,12 @@
         </div>
         `;
     		
+    }
+    
+    
+    async function listComments(){
+    	let postId = window.location.pathname.split("/").pop();
+    	
     }
     
     function deletePost(postId) {

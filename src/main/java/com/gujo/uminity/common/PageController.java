@@ -34,4 +34,15 @@ public class PageController {
         return "/postDetail.html";
     }
     
+    @GetMapping("/postForm")
+    public String postCreateForm() {
+        return "postForm.html";
+    }
+    
+    @GetMapping("/postForm/{postId}")
+    public String postUpdateForm(@PathVariable("postId") String postId) {
+    	System.out.println(postId);
+        return "/postForm.html";
+    }
+    
 }

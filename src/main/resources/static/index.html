@@ -73,7 +73,7 @@
         </div>
 
         <div class="d-flex justify-content-end mb-4">
-    		<a href="/postForm" class="btn btn-primary fw-bold rounded-3">글 작성</a>
+            <a href="/postForm" class="btn btn-primary fw-bold rounded-3">글 작성</a>
         </div>
 
         <div id="paginationWrapper"></div>
@@ -187,7 +187,7 @@
                 let data = await response.json(); // json 변환
                 console.log(data);
                 let posts = data.content; // post 목록
-                
+
                 TOTAL_POST_COUNT = posts.totalElements; // 전체 게시글 수
                 PAGE_LINK_COUNT = data.totalPages;
 
@@ -203,9 +203,9 @@
         function makeListHtml(posts) {
             let postListDiv = document.querySelector("#postList");
             postListDiv.innerHTML = "";
-            
+
             posts.forEach(post => {
-            	let postDate = formatDate(post.createdAt);
+                let postDate = formatDate(post.createdAt);
                 let tableHtml = `
 					<tr>
 						<td class="text-center">${post.postId}</td>
@@ -223,13 +223,6 @@
 
         function addPagination() {
             makePaginationHTML(SIZE, PAGE_LINK_COUNT, CURRENT_PAGE_INDEX, TOTAL_POST_COUNT, "paginationWrapper");
-        }
-
-
-        function movePage(pageIndex) {
-            PAGE = pageIndex - 1;
-            CURRENT_PAGE_INDEX = pageIndex;
-            postList();
         }
 
     </script>

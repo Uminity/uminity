@@ -7,6 +7,7 @@ import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -42,7 +43,28 @@ public class PostController {
             HttpServletRequest request,
             HttpServletResponse response) {
         // 조회수 증가
-        postService.incrementViewCount(postId, request, response);
+
+        String cookieName = "VIEWED_POST_" + postId;
+        boolean isViewed = false;
+
+        // 요청에서 쿠키 조회
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if (cookieName.equals(c.getName())) {
+                    isViewed = true;
+                    break;
+                }
+            }
+        }
+        // 아직 안본 게시글
+
+        if (!isViewed) {
+            postService.incrementViewCount(postId);
+            Cookie viewCookie = new Cookie(cookieName, "true");
+            viewCookie.setPath("/");
+            viewCookie.setMaxAge(60 * 3); // 일단 3분
+            response.addCookie(viewCookie);
+        }
 
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);

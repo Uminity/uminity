@@ -27,8 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -96,35 +95,30 @@ class PostServiceImplTest {
     @Test
     @DisplayName("존재하는 ID면 DTO 반환")
     void 게시글조회성공() {
-        // given: findById(1L) 이 postTest 를 반환
+
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
 
-        // when: 서비스 호출
         PostResponseDto dto = postService.getPost(1L);
 
-        // then: DTO 필드가 postTest 와 일치
         assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
         assertThat(dto.getTitle()).isEqualTo(postTest.getTitle());
     }
 
     @Test
-    @DisplayName("getPost: 없는 ID면 IllegalArgumentException 발생")
-    void getPost_notFound() {
-        // given: findById(any) 이 빈 Optional
+    @DisplayName("없는 ID면 IllegalArgumentException 발생 NOT FOUND")
+    void 게시글조회실패() {
         given(postRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
 
-        // When / Then: 예외 던짐
         assertThatThrownBy(() -> postService.getPost(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재하지 않는 게시글");
     }
 
     @Test
-    @DisplayName("updatePost: 존재하는 ID면 title/content 변경 후 DTO 반환")
-    void updatePost_success() {
-        // given: 수정 대상 엔티티 조회
+    @DisplayName("존재하는 ID면 title/content 변경 후 DTO 반환")
+    void 게시글수정성공() {
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
 
@@ -132,30 +126,71 @@ class PostServiceImplTest {
         req.setTitle("수정된제목");
         req.setContent("수정된내용");
 
-        // when
-        PostResponseDto dto = postService.updatePost(1L, req);
+        PostResponseDto dto = postService.updatePost(1L, req, userTest.getUserId());
 
-        // then 엔티티가 변경되어 DTO에 반영되었는지
         assertThat(dto.getTitle()).isEqualTo("수정된제목");
         assertThat(dto.getContent()).isEqualTo("수정된내용");
     }
 
     @Test
-    @DisplayName("updatePost: 없는 ID면 IllegalArgumentException 발생")
-    void updatePost_notFound() {
-        // given findById → 빈 Optional
-        given(postRepository.findById(anyLong()))
-                .willReturn(Optional.empty());
+    @DisplayName("없는 ID면 IllegalArgumentException 발생")
+    void 게시글수정실패() {
 
-        // When / Then
-        assertThatThrownBy(() -> postService.updatePost(123L, new PostUpdateRequest()))
-                .isInstanceOf(IllegalArgumentException.class);
+        given(postRepository.findById(1L))
+                .willReturn(Optional.of(postTest));
+
+        PostUpdateRequest req = new PostUpdateRequest();
+        req.setTitle("타이틀");
+        req.setContent("내용");
+
+        assertThatThrownBy(() ->
+                postService.updatePost(1L, req, "other-id")
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인만 수정할 수 있습니다.");
     }
 
     @Test
-    @DisplayName("listPosts: SEARCH_TYPE=ALL알 때 검색 호출")
+    @DisplayName("작성자면 정상 호출")
+    void 게시글삭제성공() {
+        given(postRepository.findById(1L))
+                .willReturn(Optional.of(postTest));
+
+        postService.deletePost(1L, userTest.getUserId());
+
+        then(postRepository).should().delete(postTest);
+    }
+
+    @Test
+    @DisplayName("작성자가 아니라면 예외")
+    void 게시글삭제실패() {
+        given(postRepository.findById(1L))
+                .willReturn(Optional.of(postTest));
+
+        assertThatThrownBy(() ->
+                postService.deletePost(1L, "another-id")
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("본인만 삭제할 수 있습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지않는 ID면 예외")
+    void 게시글삭제실패_없음() {
+        given(postRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                postService.deletePost(999L, userTest.getUserId())
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("존재 하지 않는 게시글: " + 999L);
+    }
+
+    @Test
+    @DisplayName("SEARCH_TYPE=ALL알 때 검색 호출")
     void listPosts_allSearch() {
-        // Given: ALL 검색일 때 두 필드 OR 검색
+        // given
         PostListRequest req = new PostListRequest();
         req.setKeyword("키워드");
         req.setPage(0);
@@ -180,5 +215,4 @@ class PostServiceImplTest {
         assertThat(page.getContent().get(0).getPostId())
                 .isEqualTo(postTest.getPostId());
     }
-
 }

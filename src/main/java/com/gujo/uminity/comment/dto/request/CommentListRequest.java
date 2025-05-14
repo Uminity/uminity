@@ -3,8 +3,10 @@ package com.gujo.uminity.comment.dto.request;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class CommentListRequest {
     @Min(value = 0, message = "page 는 0 이상")

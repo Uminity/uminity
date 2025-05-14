@@ -23,6 +23,28 @@ function showLoggedIn() {
     document.getElementById("navLogout").style.display = "";
 }
 
+
+function loadNavbar(){
+	fetch('/assets/nav.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('nav-placeholder').innerHTML = html;
+
+                    initUI();
+
+                    document.getElementById("linkLogout")
+                        .addEventListener("click", logout);
+
+                    document.getElementById("linkMyPage")
+                        .addEventListener("click", e => {
+                            e.preventDefault();
+                            location.href = '/myPage';
+                        });
+
+                })
+                .catch(err => console.error('네비 로드 실패:', err));
+}
+
 async function logout(e) {
             e.preventDefault();
 

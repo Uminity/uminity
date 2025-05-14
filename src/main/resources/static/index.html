@@ -90,24 +90,7 @@
     <script>
         window.onload = function () {
             // 1) 공통 네비 로드
-            fetch('/assets/nav.html')
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById('nav-placeholder').innerHTML = html;
-
-                    initUI();
-
-                    document.getElementById("linkLogout")
-                        .addEventListener("click", logout);
-
-                    document.getElementById("linkMyPage")
-                        .addEventListener("click", e => {
-                            e.preventDefault();
-                            location.href = '/myPage';
-                        });
-
-                })
-                .catch(err => console.error('네비 로드 실패:', err));
+            loadNavbar();
 
             // 2) Hot Issues 데이터 로드 (조회수 내림차순 상위 3개)
             fetch('/api/posts?page=0&size=3&sort=viewCnt,desc')

@@ -17,7 +17,7 @@
     <!-- navbar -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container">
-            <a class="navbar-brand" href="#">Uminity</a>
+            <a class="navbar-brand" href="/">Uminity</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                     aria-label="Toggle navigation">
@@ -26,7 +26,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link active" aria-current="page" href="/">Home</a>
                     </li>
                     <li class="nav-item" id="navUser" style="display:none;">
                         <span class="nav-link"></span>
@@ -179,31 +179,6 @@
             });
         }
 
-        // UI 초기화: 세션스토리지 user 확인 후 nav toggle
-        function initUI() {
-            const userJson = sessionStorage.getItem("user");
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                document.querySelector("#navUser .nav-link")
-                    .textContent = `${user.name}님 환영합니다.`;
-                showLoggedIn();
-            } else {
-                showLoginOnly();
-            }
-        }
-
-        function showLoginOnly() {
-            document.getElementById("navLogin").style.display = "";
-            document.getElementById("navUser").style.display = "none";
-            document.getElementById("navLogout").style.display = "none";
-        }
-
-        function showLoggedIn() {
-            document.getElementById("navLogin").style.display = "none";
-            document.getElementById("navUser").style.display = "";
-            document.getElementById("navLogout").style.display = "";
-        }
-
 
         // 게시글 목록 가져오기
         async function postList() {
@@ -221,11 +196,9 @@
                 let data = await response.json(); // json 변환
                 console.log(data);
                 let posts = data.content; // post 목록
+                
                 TOTAL_POST_COUNT = posts.totalElements; // 전체 게시글 수
-
-                console.log(data.totalElements);
                 PAGE_LINK_COUNT = data.totalPages;
-
 
                 makeListHtml(posts); // 게시글 부분
                 addPagination(); // 페이지네이션 부분
@@ -239,13 +212,15 @@
         function makeListHtml(posts) {
             let postListDiv = document.querySelector("#postList");
             postListDiv.innerHTML = "";
-            posts.forEach((post, index) => {
+            
+            posts.forEach(post => {
+            	let postDate = formatDate(post.createdAt);
                 let tableHtml = `
 					<tr>
 						<td class="text-center">${post.postId}</td>
-						<td><a href="#" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
-						<td class="text-center">${post.authName}</td>
-						<td class="text-center">${post.createdAt}</td>
+						<td><a href="/postDetail/${post.postId}" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
+						<td class="text-center">${post.authorName}</td>
+						<td class="text-center">${postDate}</td>
 						<td class="text-center">${post.viewCnt}</td>
 					</tr>
 				`;
@@ -265,32 +240,6 @@
             CURRENT_PAGE_INDEX = pageIndex;
             postList();
         }
-
-
-        async function logout(e) {
-            e.preventDefault();
-
-            // 1) 서버에 로그아웃 요청 (세션 쿠키 포함)
-            try {
-                const res = await fetch("/logout", {
-                    method: "GET",              // 또는 POST로 설정한 경우 POST
-                    credentials: "include"      // ← 매우 중요: 세션 쿠키(JSESSIONID)를 서버에 전달
-                });
-                // 로그아웃 리스폰스를 JSON으로 파싱하지 않습니다.
-                if (!res.ok) {
-                    console.warn("서버 로그아웃 실패:", res.status);
-                }
-            } catch (err) {
-                console.error("서버 로그아웃 에러:", err);
-            }
-
-            // 2) 클라이언트 세션정보 지우기
-            sessionStorage.removeItem("user");
-
-            // 3) UI 초기화 (Login 버튼만 보이도록)
-            initUI();
-        }
-
 
     </script>
 </body>

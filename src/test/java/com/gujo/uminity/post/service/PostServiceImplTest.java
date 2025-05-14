@@ -68,11 +68,10 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("createPost: 저장된 엔티티를 DTO로 반환")
-    void createPost_success() {
+    @DisplayName("엔티티를 DTO로 반환")
+    void 게시글생성성공() {
         // given
         PostCreateRequest req = new PostCreateRequest();
-        req.setUserId(userTest.getUserId());
         req.setTitle("제목");
         req.setContent("내용");
 
@@ -82,7 +81,7 @@ class PostServiceImplTest {
         given(postRepository.save(any(Post.class)))
                 .willReturn(postTest);
         // when
-        PostResponseDto dto = postService.createPost(req);
+        PostResponseDto dto = postService.createPost(req, userTest.getUserId());
 
         // then
         assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
@@ -95,8 +94,8 @@ class PostServiceImplTest {
      */
 
     @Test
-    @DisplayName("getPost: 존재하는 ID면 DTO 반환")
-    void getPost_success() {
+    @DisplayName("존재하는 ID면 DTO 반환")
+    void 게시글조회성공() {
         // given: findById(1L) 이 postTest 를 반환
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));

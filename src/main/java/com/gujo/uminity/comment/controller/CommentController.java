@@ -6,19 +6,25 @@ import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.service.CommentService;
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.security.MyUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api")
-@RequiredArgsConstructor
-public class CommentController {
+import java.net.URI;
 
+@RestController
+@RequestMapping("/api/posts/{postId}/comments")
+@RequiredArgsConstructor
+@Validated
+public class CommentController {
     private final CommentService commentService;
 
-    @GetMapping("/posts/{postId}/comments")
+    // 1. 댓글 목록 조회
+    @GetMapping
     public ResponseEntity<PageResponse<CommentResponseDto>> listComments(
             @PathVariable Long postId,
             @Valid @ModelAttribute CommentListRequest req
@@ -27,37 +33,39 @@ public class CommentController {
         return ResponseEntity.ok(page);
     }
 
-
-    @PostMapping("/posts/{postId}/comments")
+    // 2. 댓글 생성 (인증된 사용자만)
+    @PostMapping
     public ResponseEntity<CommentResponseDto> createComment(
             @PathVariable Long postId,
             @Valid @RequestBody CommentCreateRequest req,
-            @RequestHeader("X-USER-ID") String userId
+            @AuthenticationPrincipal MyUserDetails principal
     ) {
-        CommentResponseDto dto = commentService.createComment(postId, req, userId);
+        CommentResponseDto created = commentService.createComment(postId, req, principal.getUserId());
         return ResponseEntity
-                .status(201)
-                .body(dto);
+                .created(URI.create("/api/posts/" + postId + "/comments/" + created.getCommentId()))
+                .body(created);
     }
-    // 실제로는 @AuthenticationPrincipal 로 교체
 
-    @PutMapping("/comments/{commentId}")
+    // 3. 댓글 수정 (작성자만)
+    @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponseDto> updateComment(
+            @PathVariable Long postId,
             @PathVariable Long commentId,
             @Valid @RequestBody CommentUpdateRequest req,
-            @RequestHeader("X-USER-ID") String userId
+            @AuthenticationPrincipal MyUserDetails principal
     ) {
-        CommentResponseDto dto = commentService.updateComment(commentId, req, userId);
-        return ResponseEntity.ok(dto);
+        CommentResponseDto updated = commentService.updateComment(commentId, req, principal.getUserId());
+        return ResponseEntity.ok(updated);
     }
 
-
-    @DeleteMapping("/comments/{commentId}")
+    // 4. 댓글 삭제 (작성자만)
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
+            @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestHeader("X-USER-ID") String userId
+            @AuthenticationPrincipal MyUserDetails principal
     ) {
-        commentService.deleteComment(commentId, userId);
+        commentService.deleteComment(commentId, principal.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

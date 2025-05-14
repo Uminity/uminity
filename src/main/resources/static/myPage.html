@@ -56,12 +56,27 @@
 
                     <div class="tab-pane fade" id="posts" role="tabpanel" aria-labelledby="posts-tab">
                         <h2>내가 쓴 글</h2>
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="#" class="flex-grow-1 text-decoration-none">게시글 제목 예시</a>
-                                <small class="text-muted">2025-05-01</small>
-                            </li>
-                        </ul>
+                        <!-- 1) 글 목록 테이블 -->
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>제목</th>
+                                <th class="text-center">작성일</th>
+                                <th class="text-center">조회수</th>
+                            </tr>
+                            </thead>
+                            <tbody id="postList">
+                            <!-- JS가 여기를 채웁니다 -->
+                            </tbody>
+                        </table>
+
+                        <!-- 2) 페이지네이션 컨테이너 -->
+                        <nav>
+                            <ul class="pagination justify-content-center" id="paginationWrapper">
+                                <!-- makePaginationHTML()가 채워 넣어요 -->
+                            </ul>
+                        </nav>
                     </div>
 
                     <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab">
@@ -225,7 +240,47 @@
                     alert('네트워크 오류가 발생했습니다.');
                 }
             });
+
+            postList();
         });
+
+        let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'USERID', SEARCH_WORD = '';
+        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 5, CURRENT_PAGE_INDEX = 1;
+
+        function postList() {
+            const userJson = sessionStorage.getItem("user");
+            const user = userJson ? JSON.parse(userJson) : null;
+            if (!user) {
+                console.error("로그인 정보가 없습니다.");
+                return;
+            }
+
+            const url = "/api/v1/myPage/posts"
+                + "?page=" + PAGE
+                + "&size=" + SIZE
+                + "&searchType=" + SEARCH_TYPE
+                + "&keyword=" + encodeURIComponent(user.userId);
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById("postList");
+                    tbody.innerHTML = '';
+                    data.content.forEach(post => {
+                        tbody.innerHTML += `
+              <tr>
+                <td class="text-center">${post.postId}</td>
+                <td><a href="/postDetail/${post.postId}"
+                       class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
+                <td class="text-center">${post.authorName}</td>
+                <td class="text-center">${post.createdAt}</td>
+                <td class="text-center">${post.viewCnt}</td>
+              </tr>`;
+                    });
+                    makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX,
+                        data.totalElements, "paginationWrapper");
+                })
+                .catch(err => console.error("게시판 로드 실패:", err));
+        }
     </script>
 </body>
 </html>

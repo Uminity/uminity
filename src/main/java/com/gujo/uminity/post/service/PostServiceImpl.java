@@ -77,10 +77,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDto createPost(PostCreateRequest request) {
-
+    public PostResponseDto createPost(PostCreateRequest request, String userId) {
+      
         // 유저 조회부터 해야됨
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
 
 //        Post post = new Post();
@@ -103,9 +103,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDto updatePost(Long postId, PostUpdateRequest request) {
+    public PostResponseDto updatePost(Long postId, PostUpdateRequest request, String userId) {
+
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재 하지 압ㅎ습니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
+        }
+
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
 
@@ -114,8 +120,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(Long postId) {
-        postRepository.deleteById(postId);
+    public void deletePost(Long postId, String userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
+        }
+
+        postRepository.delete(post);
     }
 }
 

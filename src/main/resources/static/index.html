@@ -90,24 +90,7 @@
     <script>
         window.onload = function () {
             // 1) 공통 네비 로드
-            fetch('/assets/nav.html')
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById('nav-placeholder').innerHTML = html;
-
-                    initUI();
-
-                    document.getElementById("linkLogout")
-                        .addEventListener("click", logout);
-
-                    document.getElementById("linkMyPage")
-                        .addEventListener("click", e => {
-                            e.preventDefault();
-                            location.href = '/myPage';
-                        });
-
-                })
-                .catch(err => console.error('네비 로드 실패:', err));
+            loadNavbar();
 
             // 2) Hot Issues 데이터 로드 (조회수 내림차순 상위 3개)
             fetch('/api/posts?page=0&size=3&sort=viewCnt,desc')
@@ -187,40 +170,68 @@
                 .catch(err => console.error("게시판 로드 실패:", err));
         }
 
-        function initUI() {
-            const userJson = sessionStorage.getItem("user");
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                document.querySelector("#navUser .nav-link").textContent = `${user.name}님`;
-                showLoggedIn();
-            } else showLoginOnly();
-        }
 
-        function showLoginOnly() {
-            document.getElementById("navLogin").style.display = "";
-            document.getElementById("navUser").style.display = "none";
-            document.getElementById("navMyPage").style.display = "none";
-            document.getElementById("navLogout").style.display = "none";
-        }
+        // 게시글 목록 가져오기
+        async function postList() {
 
-        function showLoggedIn() {
-            document.getElementById("navLogin").style.display = "none";
-            document.getElementById("navUser").style.display = "";
-            document.getElementById("navMyPage").style.display = "";
-            document.getElementById("navLogout").style.display = "";
-        }
+            let url = "/api/posts";
+            let urlParams = "?page=" + PAGE +
+                "&size=" + SIZE +
+                "&searchType=" + SEARCH_TYPE +
+                "&keyword=" + encodeURIComponent(SEARCH_WORD);
 
-        async function logout(e) {
-            e.preventDefault();
-            try {
-                const res = await fetch("/logout", {method: "GET", credentials: "include"});
-                if (!res.ok) console.warn("서버 로그아웃 실패:", res.status);
-            } catch (err) {
-                console.error("서버 로그아웃 에러:", err);
+            let response = await fetch(url + urlParams); // api 호출
+
+
+            if (response.ok) {
+                let data = await response.json(); // json 변환
+                console.log(data);
+                let posts = data.content; // post 목록
+                
+                TOTAL_POST_COUNT = posts.totalElements; // 전체 게시글 수
+                PAGE_LINK_COUNT = data.totalPages;
+
+                makeListHtml(posts); // 게시글 부분
+                addPagination(); // 페이지네이션 부분
+
+            } else {
+                console.error("HTTP Error:", response.status);
             }
-            sessionStorage.removeItem("user");
-            window.location.href = "/";
         }
+
+
+        function makeListHtml(posts) {
+            let postListDiv = document.querySelector("#postList");
+            postListDiv.innerHTML = "";
+            
+            posts.forEach(post => {
+            	let postDate = formatDate(post.createdAt);
+                let tableHtml = `
+					<tr>
+						<td class="text-center">${post.postId}</td>
+						<td><a href="/postDetail/${post.postId}" class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
+						<td class="text-center">${post.authorName}</td>
+						<td class="text-center">${postDate}</td>
+						<td class="text-center">${post.viewCnt}</td>
+					</tr>
+				`;
+                postListDiv.innerHTML += tableHtml;
+            });
+            window.postData = posts;
+        }
+
+
+        function addPagination() {
+            makePaginationHTML(SIZE, PAGE_LINK_COUNT, CURRENT_PAGE_INDEX, TOTAL_POST_COUNT, "paginationWrapper");
+        }
+
+
+        function movePage(pageIndex) {
+            PAGE = pageIndex - 1;
+            CURRENT_PAGE_INDEX = pageIndex;
+            postList();
+        }
+
     </script>
 </body>
 </html>

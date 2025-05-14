@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+    <title>Uminity</title>
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <div id="nav-placeholder" class="pb-5"></div>
+
+	<!-- 게시글 상세 -->
+    <div class="container mt-5" >
+        <div class="card mb-4" id="postDetail">
+            
+        </div>
+
+        <!-- 댓글 목록 -->
+        <div class="mb-4">
+            <h5>댓글 <strong>(2)</strong></h5>
+            <div class="border rounded p-3 mb-3">
+                <p><strong>작성자명</strong> | 2025-05-13</p>
+                <p>댓글 내용이 여기에 표시됩니다.</p>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm me-2">수정</button>
+                    <button class="btn btn-outline-danger btn-sm">삭제</button>
+                </div>
+            </div>
+            <div class="border rounded p-3 mb-3">
+                <p><strong>작성자명</strong> | 2025-05-12</p>
+                <p>또 다른 댓글 내용이 여기에 표시됩니다.</p>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm me-2">수정</button>
+                    <button class="btn btn-outline-danger btn-sm">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="bg-light text-center text-lg-start mt-5 border-top">
+        <div class="container p-4">
+            <p class="text-center mb-0 text-muted">
+                © 2025 Uminity. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+	<script src="/assets/js/util.js"></script>
+    <script>
+    window.onload = function(){
+    	loadNavbar();
+    	postDetail();
+    }
+    
+    async function postDetail(){
+    	let postId = window.location.pathname.split("/").pop();
+    	console.log(postId);
+    	
+    	let response = await fetch("/api/posts/" + postId);
+    	
+    	if(response.ok){
+    		let data = await response.json();
+        	console.log(data);
+        	
+        	makeDetailHtml(data);
+    	}else{
+    		console.error("HTTP Error:", response.status);
+    	}
+    	
+    }
+    
+    function makeDetailHtml(post){
+    	let postDate = formatDate(post.createdAt);
+    	let postDetailDiv = document.querySelector("#postDetail").innerHTML =
+    		`
+    		<div class="card-body">
+            <h2 class="card-title">${post.title}</h2>
+            <div class="row">
+        		<div class="col">
+        			<p class="text-muted mb-2">작성자: <strong>${post.authorName}</strong> | 작성일: <strong>${postDate}</strong></p>
+        		</div>
+        		<div class="col d-flex justify-content-end">
+        			<p class="text-muted mb-3">좋아요: <strong>45</strong> | 조회수: <strong>${post.viewCnt}</strong></p>
+        		</div>
+        	</div>
+            <p class="card-text">${post.content}</p>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-outline-primary me-2">수정</button>
+                <button class="btn btn-outline-danger">삭제</button>
+            </div>
+            <hr>
+            <button class="btn btn-primary mb-3">👍 좋아요</button>
+        </div>
+        `;
+    		
+    }
+    
+    
+    </script>
+</body>
+
+</html>

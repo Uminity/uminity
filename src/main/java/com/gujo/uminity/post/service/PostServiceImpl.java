@@ -98,9 +98,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto updatePost(Long postId, PostUpdateRequest request) {
+    public PostResponseDto updatePost(Long postId, PostUpdateRequest request, String userId) {
+
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재 하지 압ㅎ습니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
+        }
+
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
 
@@ -108,8 +114,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePost(Long postId) {
-        postRepository.deleteById(postId);
+    public void deletePost(Long postId, String userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+
+        if (!post.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
+        }
+
+        postRepository.delete(post);
     }
 }
 

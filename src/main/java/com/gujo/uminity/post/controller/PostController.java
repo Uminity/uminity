@@ -7,6 +7,8 @@ import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +38,12 @@ public class PostController {
     // 2. 단건
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
-            @PathVariable("postId") Long postId) {
+            @PathVariable("postId") Long postId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        // 조회수 증가
+        postService.incrementViewCount(postId, request, response);
+
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);
     }

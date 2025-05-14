@@ -16,6 +16,11 @@ public class PageController {
         return "login.html";
     }
 
+    @GetMapping("/myPage")
+    public String myPage() {
+        return "myPage.html";
+    }
+
     @GetMapping("/register")
     public String register() {
         return "register.html";

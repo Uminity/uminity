@@ -22,6 +22,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 이러면 제목만, 제목 + 내용 할 수 있겠네
     // 이러면 %keyword% 적용
     // title 또는 content에 keyword 포함된 항목 조회하려고
+
+    // 4. user_userId 기반 검색
+    Page<Post> findByUser_UserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 }
 
 /*

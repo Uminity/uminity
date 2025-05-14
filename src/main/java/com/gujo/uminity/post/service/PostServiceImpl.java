@@ -73,10 +73,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponseDto createPost(PostCreateRequest request) {
+    public PostResponseDto createPost(PostCreateRequest request, String userId) {
 
         // 유저 조회부터 해야됨
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
 
 //        Post post = new Post();

@@ -95,6 +95,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentResponseDto updateComment(Long postId, Long commentId, CommentUpdateRequest req, String userId) {
 
+        postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글: " + postId));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글: " + commentId));
 
@@ -114,6 +117,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void deleteComment(Long postId, Long commentId, String userId) {
 
+        postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글: " + postId));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글: " + commentId));
 
@@ -129,7 +135,7 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
     }
 
-    /**
+    /*
      * 부모 댓글 엔티티 하나를 받아,
      * 자식 댓글(최신 3개 + 전체 개수)까지 포함한
      * CommentResponseDto로 변환하는 헬퍼 메서드

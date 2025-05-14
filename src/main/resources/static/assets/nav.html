@@ -1,0 +1,58 @@
+<!-- static/assets/nav.html -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container">
+        <!-- span에 애니메이션 클래스 추가 -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-moving">Uminity</span>
+            <!-- 흔들기 효과 쓰고 싶으면 brand-shake 로 변경 -->
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">유머</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">핫딜</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">자유게시판</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">개발톡</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">취준</a>
+                </li>
+            </ul>
+
+            <!-- Right: Login / Logout -->
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item" id="navLogin">
+                    <a class="nav-link active" href="/login">Login</a>
+                </li>
+                <li class="nav-item" id="navUser" style="display:none;">
+                    <span class="nav-link"></span>
+                </li>
+                <li class="nav-item" id="navMyPage" style="display:none;">
+                    <a class="nav-link active" href="#" id="linkMyPage">마이페이지</a>
+                </li>
+                <li class="nav-item" id="navLogout" style="display:none;">
+                    <a class="nav-link active" href="#" id="linkLogout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

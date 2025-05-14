@@ -128,24 +128,32 @@ class CommentServiceImplTest {
     void 댓글저장성공() {
 
         CommentCreateRequest req = new CommentCreateRequest();
-        req.setPostId(10L);
         req.setContent("test");
 
         given(userRepository.findById("id1")).willReturn(Optional.of(user1));
-        given(postRepository.findById(10L)).willReturn(Optional.of(post));
+        given(postRepository.findById(post.getPostId())).willReturn(Optional.of(post));
 
         Comment toSave = Comment.builder()
-                .post(post).user(user1).content("new").createdAt(now()).build();
+                .post(post)
+                .user(user1)
+                .content(req.getContent())
+                .createdAt(now())
+                .build();
 
         Comment saved = Comment.builder()
-                .commentId(200L).post(post).user(user1).content("new").createdAt(now()).build();
+                .commentId(200L)
+                .post(post)
+                .user(user1)
+                .content(req.getContent())
+                .createdAt(now())
+                .build();
 
         given(commentRepository.save(any(Comment.class))).willReturn(saved);
 
-        CommentResponseDto dto = commentService.createComment(req, "id1");
+        CommentResponseDto dto = commentService.createComment(post.getPostId(), req, "id1");
 
         assertThat(dto.getCommentId()).isEqualTo(200L);
-        assertThat(dto.getContent()).isEqualTo("new");
+        assertThat(dto.getContent()).isEqualTo("test");
     }
 
     @Test

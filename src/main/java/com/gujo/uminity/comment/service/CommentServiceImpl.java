@@ -66,12 +66,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto createComment(CommentCreateRequest req, String userId) {
+    public CommentResponseDto createComment(Long postId, CommentCreateRequest req, String userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자: " + userId));
-        Post post = postRepository.findById(req.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글: " + req.getPostId()));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글: " + postId));
 
         Comment parent = null;
         if (req.getParentId() != null) {

@@ -10,7 +10,7 @@ public interface CommentService {
     PageResponse<CommentResponseDto> listComments(Long postId, CommentListRequest req);
     // 댓글 목록 조회
 
-    CommentResponseDto createComment(CommentCreateRequest req, String userId);
+    CommentResponseDto createComment(Long postId, CommentCreateRequest req, String userId);
 
     CommentResponseDto updateComment(Long commentId, CommentUpdateRequest req, String userId);
 

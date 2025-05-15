@@ -108,6 +108,8 @@
 	    		let comments = data.content;
 	    		document.querySelector("#commentCount").innerText = `(${total_elements})`;
 	    		let commentDiv = document.querySelector("#commentDiv");
+	    		commentDiv.innerHTML = ``;
+	    		
 	    		comments.forEach(comment => {
 	    			let commentData = formatDate(comment.createdAt);
 	    			let commentHtml = `
@@ -118,7 +120,8 @@
 		                    <button class="btn btn-outline-danger btn-sm" id="btnDeleteComment">삭제</button>
 		                </div>
 		    			`;
-	    			commentDiv.innerHTML += commentHtml;
+	    			commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
+
 	    		});
 	    	}else{
 	    		console.error("HTTP Error:", response.status);
@@ -152,18 +155,15 @@
 	    
 	    
 	    async function createComment(){
-	    	
 	    	let content = document.querySelector("#commentInput").value.trim();
 	    	let userId = JSON.parse(sessionStorage.getItem("user")).userId;
 	    	
-	    	let commentData = {content, userId}
+	    	let commentData = {postId, content, userId}
 	    	
 	    	if(!content){
 	    		alert("댓글을 입력하세요");
 	    		return;
-	    	
 	    	}
-	    	
 	    	
 	    	let response = await fetch(`/api/posts/${postId}/comments`,{
 	    		method : 'POST',

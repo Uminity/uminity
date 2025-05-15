@@ -124,7 +124,8 @@
                     <div class="tab-pane fade" id="withdraw" role="tabpanel" aria-labelledby="withdraw-tab">
                         <h2 class="text-danger">회원 탈퇴</h2>
                         <p>탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
-                        <button class="btn btn-danger" id="btn-withdraw">탈퇴하기</button>
+                        <button type="button" class="btn btn-danger" id="btn-withdraw">탈퇴하기</button>
+
                     </div>
                 </div>
             </main>
@@ -248,6 +249,9 @@
                     commentList();
                 });
 
+            document.getElementById('btn-withdraw')
+                .addEventListener('click', withdrawUser);
+
             postList();
         });
 
@@ -329,6 +333,25 @@
                     data.totalElements, "commentPagination");
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        async function withdrawUser() {
+            if (!confirm('정말 탈퇴하시겠습니까?')) return;
+            try {
+                const res = await fetch('/api/v1/myPage',
+                    {method: 'DELETE', credentials: 'include'});
+                console.log("탈퇴");
+                if (res.ok) {
+                    sessionStorage.removeItem('user');
+                    alert('탈퇴되었습니다.');
+                    window.location.href = '/';
+                } else {
+                    alert('탈퇴 실패: ' + res.status);
+                }
+            } catch (err) {
+                console.error('탈퇴 중 오류:', err);
+                alert('네트워크 오류가 발생했습니다.');
             }
         }
     </script>

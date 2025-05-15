@@ -38,18 +38,8 @@ public class LikeController {
 }
 
 /*
-이유·근거:
-        * 1. POST /api/posts/{postId}/like: 특정 게시글에 대한 토글 액션 처리
- * 2. GET  /api/posts/{postId}/likers: 게시글별 좋아요 사용자 이름 목록 제공
- * 3. RESTful 설계 원칙 준수 및 관심사 분리
- */
 
-
-/**
- * 사용자 단위 좋아요 목록 조회 API 컨트롤러
- * <p>
- * 이유·근거:
- * 1. GET /api/users/me/likes: 인증된 사용자의 좋아요한 게시글 목록 조회
- * 2. @AuthenticationPrincipal 활용해 안전하게 사용자 정보 획득
- * 3. 관심사 분리로 컨트롤러 역할 명확화
- */
+1. GET /api/users/me/likes: 인증된 사용자의 좋아요한 게시글 목록 조회
+2. @AuthenticationPrincipal 활용해 안전하게 사용자 정보 획득
+3. 관심사 분리로 컨트롤러 역할 명확화
+*/

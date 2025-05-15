@@ -1,3 +1,8 @@
+html {
+    /* 스크롤이 없어도 빈 스크롤바 영역을 확보합니다 */
+    overflow-y: scroll;
+}
+
 body {
     background-color: #f8f9fa;
     font-family: 'Noto Sans KR', sans-serif;
@@ -20,7 +25,7 @@ body {
 /* Uminity 브랜드 글자에 띄우기(또는 흔들기) 애니메이션 */
 .brand-moving {
     display: inline-block;
-    animation: float 2s ease-in-out infinite;
+    animation: shake 4s ease-in-out infinite;
 }
 
 /* 위아래로 살짝 떠오르는 모션 */
@@ -33,7 +38,7 @@ body {
     }
 }
 
-/* (선택) 좌우로 흔들고 싶다면 이렇게 */
+/* 좌우로 흔들고 싶다면 이렇게 */
 .brand-shake {
     display: inline-block;
     animation: shake 1.5s ease-in-out infinite;

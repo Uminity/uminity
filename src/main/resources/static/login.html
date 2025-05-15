@@ -62,13 +62,10 @@
                     console.log("로그인 성공:", data);
                     window.location.href = "/";
                 } else {
-                    document.getElementById("error-message").textContent =
-                        data.message || "로그인에 실패했습니다.";
+                    alert(data.message);
                 }
             } catch (e) {
-                document.getElementById("error-message").textContent =
-                    "서버와 통신 중 오류가 발생했습니다.";
-                console.error(e);
+                alert(data.message);
             }
         }
     </script>

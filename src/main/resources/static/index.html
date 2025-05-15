@@ -20,7 +20,7 @@
     <div id="nav-placeholder" class="pb-5"></div>
 
     <!-- ② Hot Issues -->
-    <div class="container mb-4">
+    <div class="container mb-5">
         <h4 class="text-danger fw-bold mb-3">🔥 Hot Issues</h4>
         <ul class="list-group" id="hotList">
             <!-- JS가 상위 3개 글을 여기다 삽입합니다 -->
@@ -140,36 +140,7 @@
         };
 
         let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'TITLE', SEARCH_WORD = '';
-        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 5, CURRENT_PAGE_INDEX = 1;
-
-        function postList() {
-            const url = "/api/posts"
-                + "?page=" + PAGE
-                + "&size=" + SIZE
-                + "&searchType=" + SEARCH_TYPE
-                + "&keyword=" + encodeURIComponent(SEARCH_WORD);
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById("postList");
-                    tbody.innerHTML = '';
-                    data.content.forEach(post => {
-                        tbody.innerHTML += `
-              <tr>
-                <td class="text-center">${post.postId}</td>
-                <td><a href="/postDetail/${post.postId}"
-                       class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
-                <td class="text-center">${post.authorName}</td>
-                <td class="text-center">${post.createdAt}</td>
-                <td class="text-center">${post.viewCnt}</td>
-              </tr>`;
-                    });
-                    makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX,
-                        data.totalElements, "paginationWrapper");
-                })
-                .catch(err => console.error("게시판 로드 실패:", err));
-        }
-
+        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 10, CURRENT_PAGE_INDEX = 1;
 
         // 게시글 목록 가져오기
         async function postList() {

@@ -1,5 +1,7 @@
 package com.gujo.uminity.comment.service;
 
+import static java.time.LocalDateTime.now;
+
 import com.gujo.uminity.comment.dto.request.CommentCreateRequest;
 import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
@@ -7,11 +9,15 @@ import com.gujo.uminity.comment.dto.response.ChildCommentDto;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.entity.Comment;
 import com.gujo.uminity.comment.repository.CommentRepository;
+import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
+import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
 import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -61,6 +62,27 @@ public class CommentServiceImpl implements CommentService {
                 parentPage.getSize(),
                 parentPage.getTotalElements(),
                 parentPage.getTotalPages()
+        );
+    }
+
+    @Override
+    public PageResponse<MyCommentResponseDto> listMyComments(MyCommentRequestDto req) {
+        Pageable pageable = PageRequest.of(
+                req.getPage(),
+                req.getSize(),
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Comment> commentPage = commentRepository.findAllByUser_UserId(req.getUserId(), pageable);
+
+        Page<MyCommentResponseDto> dtoPage = commentPage.map(MyCommentResponseDto::fromEntity);
+
+        return new PageResponse<>(
+                dtoPage.getContent(),
+                dtoPage.getNumber(),
+                dtoPage.getSize(),
+                dtoPage.getTotalElements(),
+                dtoPage.getTotalPages()
         );
     }
 
@@ -122,7 +144,6 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글: " + commentId));
-
 
         if (!comment.getPost().getPostId().equals(postId)) {
             throw new IllegalArgumentException("해당 게시글에 존재하지 않는 댓글입니다.");

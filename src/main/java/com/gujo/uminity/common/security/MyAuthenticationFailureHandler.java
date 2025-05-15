@@ -23,16 +23,33 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json;charset=UTF-8");
+        System.out.println(exception.getMessage());
+        if (exception.getMessage().equals("탈퇴된 회원입니다.")) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .code("AUTHENTICATION_FAILED")
-                .message("로그인에 실패했습니다.")
-                .detail(exception.getMessage())
-                .build();
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .code("AUTHENTICATION_FAILED")
+                    .message("탈퇴된 회원입니다.")
+                    .detail(exception.getMessage())
+                    .build();
 
-        objectMapper.writeValue(response.getWriter(), errorResponse);
+            objectMapper.writeValue(response.getWriter(), errorResponse);
+            System.out.println("제발 되라");
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .code("AUTHENTICATION_FAILED")
+                    .message("로그인에 실패했습니다.")
+                    .detail(exception.getMessage())
+                    .build();
+            System.out.println("=====================================================");
+
+            objectMapper.writeValue(response.getWriter(), errorResponse);
+        }
     }
 }

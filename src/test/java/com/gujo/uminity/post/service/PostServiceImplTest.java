@@ -189,7 +189,7 @@ class PostServiceImplTest {
 
     @Test
     @DisplayName("SEARCH_TYPE=ALL알 때 검색 호출")
-    void listPosts_allSearch() {
+    void 모든게시글조회() {
         // given
         PostListRequest req = new PostListRequest();
         req.setKeyword("키워드");
@@ -214,5 +214,17 @@ class PostServiceImplTest {
         assertThat(page.getTotalElements()).isEqualTo(1);
         assertThat(page.getContent().get(0).getPostId())
                 .isEqualTo(postTest.getPostId());
+    }
+
+    @Test
+    @DisplayName("레포지토리에서만든 JPQL 메소드")
+    void 조회수증가쿼리요청() {
+        // given
+        Long postId = 42L;
+        given(postRepository.incrementViewCount(postId)).willReturn(1);
+        // when
+        postService.incrementViewCount(postId);
+        // then
+        then(postRepository).should().incrementViewCount(postId);
     }
 }

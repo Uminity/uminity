@@ -31,4 +31,22 @@ public class Like {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public static Like of(User user, Post post) {
+        return Like.builder()
+                .user(user)
+                .post(post)
+                .build();
+    }
 }
+
+/*
+도메인 무결성 , 엔티티는 세터가 되면 안된다 왜냐면 불변성을 가지고 있어야 되기 때문에
+JPA 는 NoArgs 할 때 기본 생성자가 public 해서 new 엔티티가 사용가능해져서
+정적 팩토리 메소드로만 호출 할 수 있게 접근 제어를 해야된다.
+-> of 정적 팩토리 메소드로 사용자나 게시글 누락을 막는다.
+ */

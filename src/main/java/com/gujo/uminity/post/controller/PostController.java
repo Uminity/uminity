@@ -1,15 +1,12 @@
 package com.gujo.uminity.post.controller;
 
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,36 +36,11 @@ public class PostController {
     // 2. 단건
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
-            @PathVariable("postId") Long postId,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        // 조회수 증가
-
-        String cookieName = "VIEWED_POST_" + postId;
-        boolean isViewed = false;
-
-        // 요청에서 쿠키 조회
-        if (request.getCookies() != null) {
-            for (Cookie c : request.getCookies()) {
-                if (cookieName.equals(c.getName())) {
-                    isViewed = true;
-                    break;
-                }
-            }
-        }
-        // 아직 안본 게시글
-
-        if (!isViewed) {
-            postService.incrementViewCount(postId);
-            Cookie viewCookie = new Cookie(cookieName, "true");
-            viewCookie.setPath("/");
-            viewCookie.setMaxAge(60 * 3); // 일단 3분
-            response.addCookie(viewCookie);
-        }
-
+            @PathVariable("postId") Long postId) {
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);
     }
+    // post 조회만 하는 컨트롤러, 조회수 관리만 하는 서비스, 쿠키를 통해 검증여부는 인터셉터가
 
     // 3. 게시글 생성
     @PostMapping

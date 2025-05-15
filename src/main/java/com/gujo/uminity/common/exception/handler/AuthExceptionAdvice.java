@@ -1,4 +1,4 @@
-package com.gujo.uminity.advice;
+package com.gujo.uminity.common.exception.handler;
 
 import com.gujo.uminity.auth.controller.AuthController;
 import com.gujo.uminity.common.response.ErrorResponse;

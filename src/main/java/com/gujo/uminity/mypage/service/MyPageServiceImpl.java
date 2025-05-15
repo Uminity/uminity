@@ -30,6 +30,7 @@ public class MyPageServiceImpl implements MyPageService {
                 .toList();
 
         return MyPageResponseDto.builder()
+                .userId(user.getUserId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .phone(user.getPhone())

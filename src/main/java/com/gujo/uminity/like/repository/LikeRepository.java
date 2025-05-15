@@ -1,6 +1,7 @@
 package com.gujo.uminity.like.repository;
 
 import com.gujo.uminity.like.entity.Like;
+import com.gujo.uminity.post.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,10 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     long countByPostPostId(Long postId);
 
-    Page<Like> findByUserUserId(String userId, Pageable pageable);
+
+    @Query("SELECT l.post FROM Like l WHERE l.user.userId = :userId")
+    Page<Post> findPostsByUserUserId(@Param("userId") String userId, Pageable pageable);
+
 
     @Query("SELECT l.user.name FROM Like l WHERE l.post.postId = :postId")
     Page<String> findLikerNamesByPostId(@Param("postId") Long postId, Pageable pageable);

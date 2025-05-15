@@ -113,12 +113,16 @@
 	    		comments.forEach(comment => {
 	    			let commentData = formatDate(comment.createdAt);
 	    			let commentHtml = `
-		    			<p><strong>${comment.userName}</strong> <small>${commentData}</small></p>
-		                <p>${comment.content}</p>
-		                <div class="d-flex justify-content-end">
-		                    <button class="btn btn-outline-primary btn-sm me-2" id="btnUpdateComment">수정</button>
-		                    <button class="btn btn-outline-danger btn-sm" id="btnDeleteComment">삭제</button>
-		                </div>
+	    				<div class="comment-item mb-3" id="comment-${comment.commentId}">
+		                    <p><strong>${comment.userName}</strong> <small>${commentData}</small></p>
+		                    <div class="comment-content" id="content-${comment.commentId}">
+		                        <p>${comment.content}</p>
+		                    </div>
+		                    <div class="d-flex justify-content-end">
+		                        <button class="btn btn-outline-primary btn-sm me-2" onclick="enableEdit(${comment.commentId})" id="editBtn-${comment.commentId}">수정</button>
+		                        <button class="btn btn-outline-danger btn-sm" onclick="deleteComment(${comment.commentId})" id="deleteBtn-${comment.commentId}">삭제</button>
+		                    </div>
+	                	</div>
 		    			`;
 	    			commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
 
@@ -182,6 +186,86 @@
 	    		console.error("HTTP Error:", response.status);
 	    	}
 	    	
+	    }
+	    
+	    async function enableEdit(commentId) {
+	        let contentDiv = document.getElementById(`content-${commentId}`);
+	        let originalContent = contentDiv.textContent.trim();
+	        
+	        // 원래 버튼 숨기기
+	        document.querySelector(`#editBtn-${commentId}`).style.display = "none";
+	        document.querySelector(`#deleteBtn-${commentId}`).style.display = "none";
+	        
+	        contentDiv.innerHTML = `
+	            <textarea class="form-control mb-2">${originalContent}</textarea>
+	            <div class="d-flex justify-content-end">
+	                <button class="btn btn-success btn-sm me-2" onclick="saveComment(${commentId})">저장</button>
+	                <button class="btn btn-secondary btn-sm" onclick="cancelEdit(${commentId}, '${originalContent}')">취소</button>
+	            </div>
+	        `;
+	        document.querySelector(`edit-button-${commentId}`).style.display = 'none';
+	    }
+	    
+	    // 댓글 수정
+	    async function saveComment(commentId) {
+	        const contentDiv = document.getElementById(`content-${commentId}`);
+	        const textarea = contentDiv.querySelector('textarea');
+	        const updatedContent = textarea.value.trim();
+	        
+	        
+	        if (!updatedContent) return alert('내용을 입력하세요.');
+
+	        try {
+	            const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+	                method: 'PUT',
+	                headers: {
+	                    'Content-Type': 'application/json'
+	                },
+	                body: JSON.stringify({ content: updatedContent })
+	            });
+	            if (response.ok) {
+	                contentDiv.innerHTML = `<p>${updatedContent}</p>`;
+	                document.querySelector(`#editBtn-${commentId}`).style.display = "block";
+	    	        document.querySelector(`#deleteBtn-${commentId}`).style.display = "block";
+	            } else {
+	                alert('댓글 수정에 실패했습니다.');
+	            }
+	        } catch (error) {
+	            console.error('서버 오류:', error);
+	            alert('서버 오류가 발생했습니다.');
+	        }
+	     	
+	    }
+	    
+	    // 수정 취소
+	    function cancelEdit(commentId, originalContent) {
+	        const contentDiv = document.getElementById(`content-${commentId}`);
+	        // 원래 내용 보여주기
+	        contentDiv.innerHTML = `<p>${originalContent}</p>`;
+	     	// 원래 버튼 보여주기
+	        document.querySelector(`#editBtn-${commentId}`).style.display = "block";
+	        document.querySelector(`#deleteBtn-${commentId}`).style.display = "block";
+	    }    
+	    
+	    
+	    async function deleteComment(commentId) {
+	        if (!confirm("이 댓글을 삭제하시겠습니까?")) return;
+
+	        try {
+	            let response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+	                method: 'DELETE'
+	            });
+	            
+	            if (response.ok) {
+	                alert("댓글이 삭제되었습니다.");
+	                listComments();  // 삭제 후 댓글 목록 갱신
+	            } else {
+	                alert("댓글 삭제에 실패했습니다.");
+	            }
+	        } catch (error) {
+	            console.error("서버 오류:", error);
+	            alert("서버 오류가 발생했습니다.");
+	        }
 	    }
 
     </script>

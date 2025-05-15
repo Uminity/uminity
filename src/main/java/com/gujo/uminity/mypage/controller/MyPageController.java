@@ -1,10 +1,10 @@
 package com.gujo.uminity.mypage.controller;
 
 import com.gujo.uminity.comment.service.CommentService;
-import com.gujo.uminity.common.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
 import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
 import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.mypage.dto.MyPageResponseDto;
 import com.gujo.uminity.mypage.dto.UpdateUserInfoRequestDto;
 import com.gujo.uminity.mypage.service.MyPageService;

@@ -5,7 +5,7 @@ import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.service.CommentService;
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class CommentController {
     // 1. 댓글 목록 조회
     @GetMapping
     public ResponseEntity<PageResponse<CommentResponseDto>> listComments(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @Valid @ModelAttribute CommentListRequest req
     ) {
         PageResponse<CommentResponseDto> page = commentService.listComments(postId, req);
@@ -36,7 +36,7 @@ public class CommentController {
     // 2. 댓글 생성 (인증된 사용자만)
     @PostMapping
     public ResponseEntity<CommentResponseDto> createComment(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @Valid @RequestBody CommentCreateRequest req,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
@@ -49,8 +49,8 @@ public class CommentController {
     // 3. 댓글 수정 (작성자만)
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponseDto> updateComment(
-            @PathVariable Long postId,
-            @PathVariable Long commentId,
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
             @Valid @RequestBody CommentUpdateRequest req,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
@@ -61,8 +61,8 @@ public class CommentController {
     // 4. 댓글 삭제 (작성자만)
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable Long postId,
-            @PathVariable Long commentId,
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
         commentService.deleteComment(postId, commentId, principal.getUserId());

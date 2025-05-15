@@ -1,10 +1,12 @@
 package com.gujo.uminity.advice;
 
 import com.gujo.uminity.auth.controller.AuthController;
-import com.gujo.uminity.common.ErrorResponse;
-import com.gujo.uminity.common.ResultStatus;
+import com.gujo.uminity.common.response.ErrorResponse;
+import com.gujo.uminity.common.response.ResultStatus;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.gujo.uminity.common;
+package com.gujo.uminity.common.response;
 
 import lombok.Builder;
 

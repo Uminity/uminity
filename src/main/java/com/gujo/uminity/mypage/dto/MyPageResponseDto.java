@@ -11,6 +11,7 @@ import lombok.Setter;
 @Builder
 public class MyPageResponseDto {
 
+    private String userId;
     private String name;
     private String email;
     private String phone;

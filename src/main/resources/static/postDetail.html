@@ -30,7 +30,7 @@
                 <textarea class="form-control p-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3" style="resize: none;"></textarea>
                 <button class="btn btn-primary" id="commentSubmit" style="width: 120px;">등록</button>
             </div>
-            <div class="border rounded p-3 mb-3" id="commentDiv"></div>
+            <div class="mb-3" id="commentDiv"></div>
         </div>
     </div>
 
@@ -52,8 +52,6 @@
 	    	
 	    	document.querySelector('#commentSubmit').onclick = createComment;
 	    }
-	    
-	    
 	    
 	    
 	    let postId = window.location.pathname.split("/").pop();
@@ -97,7 +95,7 @@
 	    		
 	    }
 	    
-	    
+	    // 게시글 불러오기
 	    async function listComments(){
 	    	let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
 	    	let response = await fetch(url);
@@ -113,7 +111,7 @@
 	    		comments.forEach(comment => {
 	    			let commentData = formatDate(comment.createdAt);
 	    			let commentHtml = `
-	    				<div class="comment-item mb-3" id="comment-${comment.commentId}">
+	    				<div class="comment-item mb-3 rounded border p-3" id="comment-${comment.commentId}">
 		                    <p><strong>${comment.userName}</strong> <small>${commentData}</small></p>
 		                    <div class="comment-content" id="content-${comment.commentId}">
 		                        <p>${comment.content}</p>
@@ -132,8 +130,7 @@
 	    	}
 	    }
 	    
-	    
-	   
+	   // 게시글 삭제
 	    function deletePost(postId) {
 	        if (!confirm("이 게시글을 삭제하시겠습니까?")) {
 	            return;
@@ -157,7 +154,7 @@
 	        });
 	    }
 	    
-	    
+	    // 댓글 작성
 	    async function createComment(){
 	    	let content = document.querySelector("#commentInput").value.trim();
 	    	let userId = JSON.parse(sessionStorage.getItem("user")).userId;
@@ -188,6 +185,7 @@
 	    	
 	    }
 	    
+	    // 댓글 수정 활성화
 	    async function enableEdit(commentId) {
 	        let contentDiv = document.getElementById(`content-${commentId}`);
 	        let originalContent = contentDiv.textContent.trim();
@@ -206,7 +204,7 @@
 	        document.querySelector(`edit-button-${commentId}`).style.display = 'none';
 	    }
 	    
-	    // 댓글 수정
+	    // 댓글 수정 진행
 	    async function saveComment(commentId) {
 	        const contentDiv = document.getElementById(`content-${commentId}`);
 	        const textarea = contentDiv.querySelector('textarea');
@@ -237,7 +235,7 @@
 	     	
 	    }
 	    
-	    // 수정 취소
+	    // 댓글 수정 취소
 	    function cancelEdit(commentId, originalContent) {
 	        const contentDiv = document.getElementById(`content-${commentId}`);
 	        // 원래 내용 보여주기
@@ -247,7 +245,7 @@
 	        document.querySelector(`#deleteBtn-${commentId}`).style.display = "block";
 	    }    
 	    
-	    
+	    // 댓글 삭제
 	    async function deleteComment(commentId) {
 	        if (!confirm("이 댓글을 삭제하시겠습니까?")) return;
 
@@ -267,8 +265,6 @@
 	            alert("서버 오류가 발생했습니다.");
 	        }
 	    }
-
     </script>
 </body>
-
 </html>

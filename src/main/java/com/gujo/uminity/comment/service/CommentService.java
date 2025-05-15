@@ -4,7 +4,7 @@ import com.gujo.uminity.comment.dto.request.CommentCreateRequest;
 import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 
 public interface CommentService {
     PageResponse<CommentResponseDto> listComments(Long postId, CommentListRequest req);

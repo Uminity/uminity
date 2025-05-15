@@ -1,6 +1,6 @@
 package com.gujo.uminity.post.service;
 
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;

@@ -2,7 +2,7 @@ package com.gujo.uminity.auth.service;
 
 import com.gujo.uminity.auth.dto.RegisterRequestDto;
 import com.gujo.uminity.auth.dto.RegisterResponseDto;
-import com.gujo.uminity.common.ResultStatus;
+import com.gujo.uminity.common.response.ResultStatus;
 import com.gujo.uminity.user.entity.Role;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.RoleRepository;

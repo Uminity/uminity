@@ -5,7 +5,7 @@ import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.service.CommentService;
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

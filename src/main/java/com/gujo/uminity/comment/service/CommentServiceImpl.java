@@ -7,7 +7,7 @@ import com.gujo.uminity.comment.dto.response.ChildCommentDto;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.entity.Comment;
 import com.gujo.uminity.comment.repository.CommentRepository;
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;

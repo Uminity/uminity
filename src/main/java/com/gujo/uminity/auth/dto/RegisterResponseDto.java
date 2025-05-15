@@ -1,6 +1,6 @@
 package com.gujo.uminity.auth.dto;
 
-import com.gujo.uminity.common.ResultStatus;
+import com.gujo.uminity.common.response.ResultStatus;
 import lombok.Builder;
 import lombok.Getter;
 

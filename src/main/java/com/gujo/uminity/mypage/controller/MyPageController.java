@@ -2,6 +2,7 @@ package com.gujo.uminity.mypage.controller;
 
 import com.gujo.uminity.comment.service.CommentService;
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.security.MyUserDetails;
 import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
 import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
 import com.gujo.uminity.mypage.dto.MyPageResponseDto;
@@ -13,7 +14,9 @@ import com.gujo.uminity.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,5 +55,13 @@ public class MyPageController {
     public ResponseEntity<PageResponse<MyCommentResponseDto>> listMyComments(@Validated @ModelAttribute MyCommentRequestDto myCommentRequestDto) {
         PageResponse<MyCommentResponseDto> page = commentService.listMyComments(myCommentRequestDto);
         return ResponseEntity.ok(page);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUser(@AuthenticationPrincipal MyUserDetails myUserDetails) {
+        String userId = myUserDetails.getUserId();
+        System.out.println(userId);
+        myPageService.deleteUser(myUserDetails.getUserId());
     }
 }

@@ -8,4 +8,6 @@ public interface MyPageService {
     MyPageResponseDto getMyPageInfo();
 
     void updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto);
+
+    void deleteUser(String userId);
 }

@@ -50,6 +50,10 @@ public class MyPageServiceImpl implements MyPageService {
         User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
+        if (userRepository.existsByPhoneAndUserIdNot(updateUserInfoRequestDto.getPhone(), user.getUserId())) {
+            throw new IllegalArgumentException("이미 등록된 휴대폰 번호입니다.");
+        }
+
         user.setName(updateUserInfoRequestDto.getName());
         user.setPhone(updateUserInfoRequestDto.getPhone());
     }

@@ -134,11 +134,12 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void incrementViewCount(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
-        // 엔티티 성공적으로 로드하면 +1해주자
-        post.setViewCnt(post.getViewCnt() + 1);
-        // 트랜잭션 커밋시 반영
+//        Post post = postRepository.findById(postId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+//        // 엔티티 성공적으로 로드하면 +1해주자
+//        post.setViewCnt(post.getViewCnt() + 1);
+//        무조건 postId가 있다고 생각해서 쿼리문을 업데이트만 사용하게끔
+        postRepository.incrementViewCount(postId);
     }
 }
 

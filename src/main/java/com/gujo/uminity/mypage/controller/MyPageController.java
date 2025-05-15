@@ -1,6 +1,9 @@
 package com.gujo.uminity.mypage.controller;
 
+import com.gujo.uminity.comment.service.CommentService;
 import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
+import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
 import com.gujo.uminity.mypage.dto.MyPageResponseDto;
 import com.gujo.uminity.mypage.dto.UpdateUserInfoRequestDto;
 import com.gujo.uminity.mypage.service.MyPageService;
@@ -26,6 +29,7 @@ public class MyPageController {
 
     private final MyPageService myPageService;
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping
     public ResponseEntity<MyPageResponseDto> getMyPageInfo() {
@@ -39,8 +43,14 @@ public class MyPageController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<PageResponse<PostResponseDto>> listPosts(@Validated @ModelAttribute PostListRequest req) {
-        PageResponse<PostResponseDto> page = postService.listPosts(req);
+    public ResponseEntity<PageResponse<PostResponseDto>> listPosts(@Validated @ModelAttribute PostListRequest postListRequest) {
+        PageResponse<PostResponseDto> page = postService.listPosts(postListRequest);
+        return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/comments")
+    public ResponseEntity<PageResponse<MyCommentResponseDto>> listMyComments(@Validated @ModelAttribute MyCommentRequestDto myCommentRequestDto) {
+        PageResponse<MyCommentResponseDto> page = commentService.listMyComments(myCommentRequestDto);
         return ResponseEntity.ok(page);
     }
 }

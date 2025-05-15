@@ -1,4 +1,4 @@
-package com.gujo.uminity.common;
+package com.gujo.uminity.common.web;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

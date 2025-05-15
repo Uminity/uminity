@@ -1,6 +1,6 @@
 package com.gujo.uminity.post.controller;
 
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -40,6 +40,7 @@ public class PostController {
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);
     }
+    // post 조회만 하는 컨트롤러, 조회수 관리만 하는 서비스, 쿠키를 통해 검증여부는 인터셉터가
 
     // 3. 게시글 생성
     @PostMapping

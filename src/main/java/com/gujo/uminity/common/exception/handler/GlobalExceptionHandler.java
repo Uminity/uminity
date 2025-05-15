@@ -1,6 +1,6 @@
 package com.gujo.uminity.common.exception.handler;
 
-import com.gujo.uminity.common.ErrorResponse;
+import com.gujo.uminity.common.response.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

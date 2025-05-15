@@ -99,7 +99,7 @@ function makePaginationHTML(listRowCount, pageLinkCount, currentPageIndex, total
     }
 
     let next;
-    if (endPageIndex > pageCount) {
+    if (endPageIndex > pageLinkCount) {
         endPageIndex = pageCount
         next = false;
     } else {

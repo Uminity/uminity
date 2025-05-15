@@ -1,8 +1,6 @@
 package com.gujo.uminity.post.service;
 
-import static java.time.LocalDateTime.now;
-
-import com.gujo.uminity.common.PageResponse;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
@@ -18,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +78,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostResponseDto createPost(PostCreateRequest request, String userId) {
-      
+
         // 유저 조회부터 해야됨
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
@@ -129,6 +129,17 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Override
+    @Transactional
+    public void incrementViewCount(Long postId) {
+//        Post post = postRepository.findById(postId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
+//        // 엔티티 성공적으로 로드하면 +1해주자
+//        post.setViewCnt(post.getViewCnt() + 1);
+//        무조건 postId가 있다고 생각해서 쿼리문을 업데이트만 사용하게끔
+        postRepository.incrementViewCount(postId);
     }
 }
 

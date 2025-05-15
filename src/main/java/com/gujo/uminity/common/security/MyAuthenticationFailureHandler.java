@@ -1,11 +1,13 @@
 package com.gujo.uminity.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gujo.uminity.common.ErrorResponse;
+import com.gujo.uminity.common.response.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;

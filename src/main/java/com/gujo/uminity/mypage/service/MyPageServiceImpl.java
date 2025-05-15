@@ -22,7 +22,7 @@ public class MyPageServiceImpl implements MyPageService {
     public MyPageResponseDto getMyPageInfo() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
         List<String> roleNames = user.getRoles().stream()
@@ -47,10 +47,19 @@ public class MyPageServiceImpl implements MyPageService {
                 .getAuthentication().getName();
 
         // 2) 엔티티 조회
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 
         user.setName(updateUserInfoRequestDto.getName());
         user.setPhone(updateUserInfoRequestDto.getPhone());
+    }
+
+    @Transactional
+    @Override
+    public void deleteUser(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자:" + userId));
+
+        user.setDeleted(true);
     }
 }

@@ -1,6 +1,7 @@
 package com.gujo.uminity.like.service;
 
 import com.gujo.uminity.common.web.PageResponse;
+import com.gujo.uminity.like.dto.response.CheckLikeResponse;
 import com.gujo.uminity.like.dto.response.ToggleLikeResponse;
 import com.gujo.uminity.like.entity.Like;
 import com.gujo.uminity.like.repository.LikeRepository;
@@ -49,6 +50,11 @@ public class LikeServiceImpl implements LikeService {
                 .likedByMe(likedByMe)
                 .likeCount(count)
                 .build();
+    }
+
+    @Override
+    public CheckLikeResponse checkLike(String userId, Long postId) {
+        return new CheckLikeResponse(likeRepository.existsByUserUserIdAndPostPostId(userId, postId));
     }
 
     @Override

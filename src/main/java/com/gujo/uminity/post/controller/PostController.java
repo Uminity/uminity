@@ -1,12 +1,13 @@
 package com.gujo.uminity.post.controller;
 
-import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.common.security.MyUserDetails;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
 import com.gujo.uminity.post.dto.request.PostUpdateRequest;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
+import com.gujo.uminity.resolver.ViewCookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +37,13 @@ public class PostController {
     // 2. 단건
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
-            @PathVariable("postId") Long postId) {
+            @PathVariable Long postId,
+            @ViewCookie boolean isNew) {
+
+        postService.incrementViewCountIfNew(postId, isNew);
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);
     }
-    // post 조회만 하는 컨트롤러, 조회수 관리만 하는 서비스, 쿠키를 통해 검증여부는 인터셉터가
 
     // 3. 게시글 생성
     @PostMapping

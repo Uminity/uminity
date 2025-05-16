@@ -17,9 +17,12 @@
     <script src="/assets/js/alert.js" defer></script>
 </head>
 <body>
-    <div id="nav-placeholder"></div>
+    <!-- 네비게이션 -->
+    <div id="nav-placeholder" class="pb-5"></div>
+
     <div class="container my-5">
         <div class="row">
+            <!-- 사이드바 -->
             <aside class="col-md-3 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -44,6 +47,8 @@
                     </div>
                 </div>
             </aside>
+
+            <!-- 콘텐츠 영역 -->
             <main class="col-md-9">
                 <div class="tab-content" id="myTabContent">
                     <!-- 회원정보 수정 -->
@@ -85,6 +90,7 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- 비밀번호 변경 -->
                     <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
                         <div class="card shadow-sm">
@@ -108,85 +114,126 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- 내가 쓴 글 -->
                     <div class="tab-pane fade" id="posts" role="tabpanel" aria-labelledby="posts-tab">
-                        <!-- 생략 -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h2 class="card-title mb-4"><i class="bi bi-file-earmark-text me-2"></i> 내가 쓴 게시글</h2>
+                                <ul class="list-group" id="postList"></ul>
+                                <nav class="mt-4">
+                                    <ul class="pagination justify-content-center" id="paginationWrapper"></ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
+
                     <!-- 내가 쓴 댓글 -->
                     <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab">
-                        <!-- 생략 -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h2 class="card-title mb-4"><i class="bi bi-chat-dots me-2"></i> 내가 쓴 댓글</h2>
+                                <ul class="list-group" id="commentList"></ul>
+                                <nav class="mt-4">
+                                    <ul class="pagination justify-content-center" id="commentPagination"></ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
+
                     <!-- 회원 탈퇴 -->
                     <div class="tab-pane fade" id="withdraw" role="tabpanel" aria-labelledby="withdraw-tab">
-                        <!-- 생략 -->
+                        <div class="card shadow-sm border-danger">
+                            <div class="card-body">
+                                <h2 class="card-title text-danger mb-4"><i class="bi bi-exclamation-triangle me-2"></i> 회원 탈퇴</h2>
+                                <div class="alert alert-warning"><i class="bi bi-info-circle me-2"></i> 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</div>
+                                <p>탈퇴하시면 작성하신 게시글과 댓글은 남아있지만, 계정 정보는 삭제됩니다. 정말로 탈퇴하시겠습니까?</p>
+                                <button type="button" class="btn btn-danger" id="btn-withdraw"><i class="bi bi-person-x me-2"></i> 탈퇴하기</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-    <!-- 공통 스크립트 -->
+
+    <!-- 스크립트 -->
     <script>
         window.onload = async function () {
-            // CSRF 토큰 초기화
+            // 1) CSRF 초기화
             await initUtil();
 
-            // 네비 로드 및 UI 세팅
-            fetch('/assets/nav.html')
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById('nav-placeholder').innerHTML = html;
-                    initUI();
+            // 2) 네비 로드
+            const navHtml = await fetch('/assets/nav.html').then(r => r.text());
+            document.getElementById('nav-placeholder').innerHTML = navHtml;
+            initUI();
 
-                    document.getElementById('btnChangePassword').addEventListener('click', async () => {
-                        const current = document.getElementById('currentPassword').value;
-                        const next = document.getElementById('newPassword').value;
-                        const confirm = document.getElementById('confirmPassword').value;
-                        if (!current || !next || next !== confirm) return showErrorAlert('비밀번호가 일치하지 않거나 입력이 누락되었습니다.');
-                        try {
-                            const res = await util.fetchWithCsrf('/api/v1/myPage/password', {
-                                method: 'PATCH',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({currentPassword: current, newPassword: next})
-                            });
-                            if (res.ok) {
-                                showSuccessAlert('비밀번호가 변경되었습니다.');
-                                setTimeout(() => window.location.href = '/myPage', 1000);
-                            } else showErrorAlert('비밀번호 변경에 실패했습니다.');
-                        } catch (err) {
-                            console.error(err);
-                            showErrorAlert('서버 오류가 발생했습니다.');
-                        }
-                    });
+            // 3) 내 정보 및 초기 콘텐츠 로드
+            await loadMyInfo();
+            postList();
 
-                    document.getElementById('linkLogout')
-                        .addEventListener('click', async e => {
-                            e.preventDefault();
-                            try {
-                                const r = await util.fetchWithCsrf('/logout', {method: 'POST'});
-                                if (!r.ok) console.warn('서버 로그아웃 실패:', r.status);
-                            } catch (err) {
-                                console.error('서버 로그아웃 에러:', err);
-                            }
-                            sessionStorage.removeItem('user');
-                            window.location.href = '/';
-                        });
+            // 4) 이벤트 바인딩
+            document.getElementById('updateForm').addEventListener('submit', async e => {
+                e.preventDefault();
+                const payload = {
+                    name: document.getElementById('name').value.trim(),
+                    phone: document.getElementById('phone').value.trim()
+                };
+                const res = await util.fetchWithCsrf('/api/v1/myPage', {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if (res.status === 204) {
+                    showSuccessAlert('회원정보가 정상적으로 수정되었습니다.');
+                    await loadMyInfo();
+                } else {
+                    const err = await res.json();
+                    showErrorAlert('수정 실패: ' + (err.message || res.status));
+                }
+            });
 
-                    document.getElementById('linkMyPage')
-                        .addEventListener('click', e => {
-                            e.preventDefault();
-                            location.href = '/myPage';
-                        });
-                })
-                .catch(err => console.error('네비 로드 실패:', err));
+            document.getElementById('btnChangePassword').addEventListener('click', async () => {
+                const current = document.getElementById('currentPassword').value;
+                const next = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+                if (!current || !next || next !== confirm) return showErrorAlert('비밀번호가 일치하지 않거나 입력이 누락되었습니다.');
+                const res = await util.fetchWithCsrf('/api/v1/myPage/password', {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({currentPassword: current, newPassword: next})
+                });
+                if (res.ok) {
+                    showSuccessAlert('비밀번호가 변경되었습니다.');
+                    setTimeout(() => window.location.href = '/myPage', 850);
+                } else showErrorAlert('비밀번호 변경에 실패했습니다.');
+            });
+
+            document.getElementById('posts-tab').addEventListener('shown.bs.tab', () => {
+                PAGE = 0;
+                CURRENT_PAGE_INDEX = 1;
+                postList();
+            });
+            document.getElementById('comments-tab').addEventListener('shown.bs.tab', () => {
+                PAGE = 0;
+                CURRENT_PAGE_INDEX = 1;
+                commentList();
+            });
+
+            document.getElementById('btn-withdraw').addEventListener('click', async () => {
+                if (!await showConfirm('정말로 탈퇴하시겠습니까?', '회원 탈퇴', '탈퇴하기', '취소')) return;
+                const r = await util.fetchWithCsrf('/api/v1/myPage', {method: 'DELETE'});
+                if (r.ok) {
+                    sessionStorage.removeItem('user');
+                    showSuccessAlert('탈퇴되었습니다.');
+                    setTimeout(() => location.href = '/', 850);
+                } else showErrorAlert('탈퇴 실패: ' + r.status);
+            });
         };
-    </script>
 
-    <!-- 마이페이지 데이터 로드 & 이벤트 -->
-    <script>
-        // 나의 정보 불러오기
         async function loadMyInfo() {
             try {
-                const res = await fetch('/api/v1/myPage', {method: 'GET', credentials: 'include'});
+                const res = await util.fetchWithCsrf('/api/v1/myPage', {method: 'GET'});
                 if (!res.ok) throw res;
                 const {name, email, phone, roles} = await res.json();
                 document.getElementById('name').value = name;
@@ -198,160 +245,53 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadMyInfo();
+        let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'USERID', CURRENT_PAGE_INDEX = 1;
 
-            // 정보 수정
-            document.getElementById('updateForm')
-                .addEventListener('submit', async e => {
-                    e.preventDefault();
-                    const payload = {
-                        name: document.getElementById('name').value.trim(),
-                        phone: document.getElementById('phone').value.trim()
-                    };
-                    try {
-                        const res = await util.fetchWithCsrf('/api/v1/myPage', {
-                            method: 'PATCH',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(payload)
-                        });
-                        if (res.status === 204) {
-                            showSuccessAlert('회원정보가 정상적으로 수정되었습니다.');
-                            loadMyInfo();
-                        } else {
-                            const err = await res.json();
-                            showErrorAlert('수정 실패 : ' + (err.message || res.status));
-                        }
-                    } catch (err) {
-                        console.error('수정 중 오류', err);
-                        showErrorAlert('네트워크 오류가 발생했습니다.');
-                    }
-                });
-
-            // 내가 쓴 게시글 탭
-            document.getElementById('posts-tab')
-                .addEventListener('shown.bs.tab', () => {
-                    PAGE = 0;
-                    CURRENT_PAGE_INDEX = 1;
-                    postList();
-                });
-
-            // 내가 쓴 댓글 탭
-            document.getElementById('comments-tab')
-                .addEventListener('shown.bs.tab', () => {
-                    PAGE = 0;
-                    CURRENT_PAGE_INDEX = 1;
-                    commentList();
-                });
-
-            // 탈퇴
-            document.getElementById('btn-withdraw')
-                .addEventListener('click', async () => {
-                    const ok = await showConfirm('정말로 탈퇴하시겠습니까?', '회원 탈퇴', '탈퇴하기', '취소');
-                    if (!ok) return;
-                    try {
-                        const r = await util.fetchWithCsrf('/api/v1/myPage', {method: 'DELETE'});
-                        if (r.ok) {
-                            sessionStorage.removeItem('user');
-                            showSuccessAlert('탈퇴되었습니다.');
-                            setTimeout(() => window.location.href = '/', 850);
-                        } else showErrorAlert('탈퇴 실패: ' + r.status);
-                    } catch (err) {
-                        console.error('탈퇴 중 오류:', err);
-                        showErrorAlert('네트워크 오류가 발생했습니다.');
-                    }
-                });
-
-            // 기본 탭: 내 게시글
-            postList();
-        });
-
-        let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'USERID', SEARCH_WORD = '';
-        let CURRENT_PAGE_INDEX = 1;
-
-        // 내가 쓴 게시글 목록
         async function postList() {
             const userJson = sessionStorage.getItem('user');
             if (!userJson) return;
             const userId = JSON.parse(userJson).userId;
             const url = `/api/v1/myPage/posts?page=${PAGE}&size=${SIZE}&searchType=${SEARCH_TYPE}&keyword=${encodeURIComponent(userId)}`;
             try {
-                const res = await fetch(url, {credentials: 'include'});
+                const res = await util.fetchWithCsrf(url, {method: 'GET'});
+                if (!res.ok) throw res;
                 const data = await res.json();
                 const list = document.getElementById('postList');
                 list.innerHTML = '';
                 if (data.content.length === 0) {
-                    list.innerHTML = `<li class="list-group-item text-center py-5">
-                        <i class="bi bi-file-earmark-x fs-1 text-muted mb-3"></i>
-                        <p class="text-muted">작성한 게시글이 없습니다.</p>
-                    </li>`;
+                    list.innerHTML = '<li class="list-group-item text-center py-5"><i class="bi bi-file-earmark-x fs-1 text-muted mb-3"></i><p class="text-muted">작성한 게시글이 없습니다.</p></li>';
                 } else {
                     data.content.forEach(post => {
-                        list.innerHTML += `
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-1">
-                                        <a href="/postDetail/${post.postId}" class="text-decoration-none">${post.title}</a>
-                                    </h5>
-                                    <small class="text-muted">
-                                        <i class="bi bi-eye me-1"></i> ${post.viewCnt}
-                                        <i class="bi bi-calendar3 ms-2 me-1"></i> ${formatDate(post.createdAt)}
-                                    </small>
-                                </div>
-                                <a href="/postDetail/${post.postId}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </li>`;
+                        list.innerHTML += `<li class="list-group-item"><div class="d-flex justify-content-between align-items-center"><div><h5 class="mb-1"><a href="/postDetail/${post.postId}" class="text-decoration-none">${post.title}</a></h5><small class="text-muted"><i class="bi bi-eye me-1"></i>${post.viewCnt}<i class="bi bi-calendar3 ms-2 me-1"></i>${formatDate(post.createdAt)}</small></div><a href="/postDetail/${post.postId}" class="btn btn-sm btn-outline-primary ms-2"><i class="bi bi-arrow-right"></i></a></div></li>`;
                     });
                 }
                 makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX, data.totalElements, 'paginationWrapper');
-            } catch (err) {
-                console.error(err);
+            } catch (e) {
+                console.error('게시글 로드 실패', e);
             }
         }
 
-        // 내가 쓴 댓글 목록
         async function commentList() {
             const userJson = sessionStorage.getItem('user');
             if (!userJson) return;
             const userId = JSON.parse(userJson).userId;
             const url = `/api/v1/myPage/comments?userId=${encodeURIComponent(userId)}&page=${PAGE}&size=${SIZE}`;
             try {
-                const res = await fetch(url, {credentials: 'include'});
+                const res = await util.fetchWithCsrf(url, {method: 'GET'});
+                if (!res.ok) throw res;
                 const data = await res.json();
                 const list = document.getElementById('commentList');
                 list.innerHTML = '';
                 if (data.content.length === 0) {
-                    list.innerHTML = `<li class="list-group-item text-center py-5">
-                        <i class="bi bi-chat-square-x fs-1 text-muted mb-3"></i>
-                        <p class="text-muted">작성한 댓글이 없습니다.</p>
-                    </li>`;
+                    list.innerHTML = '<li class="list-group-item text-center py-5"><i class="bi bi-chat-square-x fs-1 text-muted mb-3"></i><p class="text-muted">작성한 댓글이 없습니다.</p></li>';
                 } else {
                     data.content.forEach(c => {
-                        list.innerHTML += `
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <p class="mb-1">${c.content}</p>
-                                    <small class="text-muted">
-                                        <a href="/postDetail/${c.postId}" class="text-decoration-none">
-                                            <i class="bi bi-file-earmark-text me-1"></i> ${c.postTitle}
-                                        </a>
-                                        <i class="bi bi-calendar3 ms-2 me-1"></i> ${formatDate(c.createdAt)}
-                                    </small>
-                                </div>
-                                <a href="/postDetail/${c.postId}" class="btn btn-sm btn-outline-primary ms-2">
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </li>`;
+                        list.innerHTML += `<li class="list-group-item"><div class="d-flex justify-content-between align-items-start"><div><p class="mb-1">${c.content}</p><small class="text-muted"><a href="/postDetail/${c.postId}" class="text-decoration-none"><i class="bi bi-file-earmark-text me-1"></i>${c.postTitle}</a><i class="bi bi-calendar3 ms-2 me-1"></i>${formatDate(c.createdAt)}</small></div><a href="/postDetail/${c.postId}" class="btn btn-sm btn-outline-primary ms-2"><i class="bi bi-arrow-right"></i></a></div></li>`;
                     });
                 }
                 makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX, data.totalElements, 'commentPagination');
-            } catch (err) {
-                console.error(err);
+            } catch (e) {
+                console.error('댓글 로드 실패', e);
             }
         }
     </script>

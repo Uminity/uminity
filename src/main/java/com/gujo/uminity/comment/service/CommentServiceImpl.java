@@ -19,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,7 +144,11 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalArgumentException("해당 게시글에 존재하지 않는 댓글입니다.");
         }
 
-        if (!comment.getUser().getUserId().equals(userId)) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+
+        if (!comment.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }
 

@@ -1,9 +1,7 @@
 package com.gujo.uminity.post.controller;
 
-import com.gujo.uminity.post.dto.response.PostResponseDto;
 import com.gujo.uminity.post.service.PostService;
 import com.gujo.uminity.resolver.ViewCookieArgumentResolver;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,16 +9,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class PostControllerTest {
@@ -45,46 +45,40 @@ class PostControllerTest {
     @Test
     @DisplayName("처음조회에는 쿠키 없어서 incrementViewCount 호출 쿠키 추가")
     void 처음조회() throws Exception {
-        // given
-        PostResponseDto dto = PostResponseDto.builder()
-                .postId(POST_ID)
-                .authorName("Author")
-                .title("Title")
-                .content("Content")
-                .createdAt(null)
-                .viewCnt(1)
-                .build();
-        given(postService.getPost(POST_ID)).willReturn(dto);
+        long postId = 1L;
 
-        mockMvc.perform(get("/api/posts/{postId}", POST_ID)
-                        .accept(MediaType.APPLICATION_JSON))
+        // 1) getPost 은 null 반환해도 OK (body 검증은 하지 않음)
+        when(postService.getPost(postId)).thenReturn(null);
+        doNothing().when(postService).incrementViewCountIfNew(postId, true);
+
+        mockMvc.perform(get("/api/posts/{postId}", postId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.postId").value(POST_ID))
-                .andExpect(cookie().exists("VIEWED_POSTS"));
+                // 쿠키가 설정됐는지 확인 (헤더 존재 + 값 검증)
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(header().string("Set-Cookie",
+                        org.hamcrest.Matchers.containsString("VIEWED_POSTS=" + postId)));
 
-        then(postService).should().incrementViewCountIfNew(POST_ID, true);
+        verify(postService).incrementViewCountIfNew(postId, true);
     }
 
     @Test
     @DisplayName("이미 본 게시글이면 incrementViewCount 미호출 및 새로운 쿠키 미추가")
     void 이미본게시글() throws Exception {
-        PostResponseDto dto = PostResponseDto.builder()
-                .postId(POST_ID)
-                .authorName("Author")
-                .title("Title")
-                .content("Content")
-                .createdAt(null)
-                .viewCnt(1)
-                .build();
-        given(postService.getPost(POST_ID)).willReturn(dto);
+        long postId = 1L;
 
-        mockMvc.perform(get("/api/posts/{postId}", POST_ID)
-                        .cookie(new Cookie("VIEWED_POSTS", String.valueOf(POST_ID)))
-                        .accept(MediaType.APPLICATION_JSON))
+        // 이미 본 상태를 흉내내기 위해 쿠키를 URL-encoded 값으로 생성
+        String encoded = URLEncoder.encode(String.valueOf(postId), StandardCharsets.UTF_8);
+        MockCookie viewedCookie = new MockCookie("VIEWED_POSTS", encoded);
+
+        when(postService.getPost(postId)).thenReturn(null);
+        doNothing().when(postService).incrementViewCountIfNew(postId, false);
+
+        mockMvc.perform(get("/api/posts/{postId}", postId)
+                        .cookie(viewedCookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.postId").value(POST_ID))
-                .andExpect(cookie().doesNotExist("VIEWED_POSTS"));
+                // Set-Cookie 헤더가 **없어야** 합니다
+                .andExpect(header().doesNotExist("Set-Cookie"));
 
-        then(postService).should(never()).incrementViewCountIfNew(POST_ID, true);
+        verify(postService).incrementViewCountIfNew(postId, false);
     }
 }

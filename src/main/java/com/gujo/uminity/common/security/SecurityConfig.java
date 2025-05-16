@@ -24,7 +24,8 @@ public class SecurityConfig {
         http.authenticationProvider(daoAuthenticationProvider());
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers("/myPage", "/myPage/**", "/api/v1/myPage/**")
+                .authenticated()
                 .anyRequest().permitAll()
         );
 

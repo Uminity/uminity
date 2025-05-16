@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
@@ -16,68 +17,75 @@
 
 <body>
 
-    <!-- navbar -->
-    <div id="nav-placeholder" class="pb-5"></div>
+<!-- navbar -->
+<div id="nav-placeholder" class="pb-5"></div>
 
-    <!-- 게시글 상세 -->
-    <div class="container mt-5">
-        <div class="card mb-4 shadow-sm" id="postDetail">
-            <!-- 내용은 JavaScript로 채워집니다 -->
-        </div>
-
-        <!-- 댓글 -->
-        <div class="mb-4">
-            <h5 class="d-flex align-items-center mb-3">
-                <i class="bi bi-chat-dots me-2"></i> 댓글 <span id="commentCount" class="ms-2 badge bg-primary rounded-pill"></span>
-            </h5>
-            <div class="card shadow-sm mb-3">
-                <!-- 댓글 입력 -->
-                <div class="card-body">
-                    <textarea class="form-control p-3 mb-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3" style="resize: none;"></textarea>
-                    <div class="d-flex justify-content-end">
-                        <button class="btn btn-primary" id="commentSubmit">
-                            <i class="bi bi-send"></i> 등록
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- 댓글 목록 -->
-            <div class="mb-3" id="commentDiv"></div>
-        </div>
+<!-- 게시글 상세 -->
+<div class="container mt-5">
+    <div class="card mb-4 shadow-sm" id="postDetail">
+        <!-- 내용은 JavaScript로 채워집니다 -->
     </div>
 
-    <!-- footer -->
-    <footer class="bg-light text-center text-lg-start mt-5 border-top">
-        <div class="container p-4">
-            <p class="text-center mb-0 text-muted">
-                © 2025 Uminity. All rights reserved.
-            </p>
+    <!-- 댓글 -->
+    <div class="mb-4">
+        <h5 class="d-flex align-items-center mb-3">
+            <i class="bi bi-chat-dots me-2"></i> 댓글 <span id="commentCount"
+                                                          class="ms-2 badge bg-primary rounded-pill"></span>
+        </h5>
+        <div class="card shadow-sm mb-3">
+            <!-- 댓글 입력 -->
+            <div class="card-body">
+                <textarea class="form-control p-3 mb-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3"
+                          style="resize: none;"></textarea>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-primary" id="commentSubmit">
+                        <i class="bi bi-send"></i> 등록
+                    </button>
+                </div>
+            </div>
         </div>
-    </footer>
+        <!-- 댓글 목록 -->
+        <div class="mb-3" id="commentDiv"></div>
+    </div>
+</div>
 
-    <script src="/assets/js/util.js"></script>
-    <script src="/assets/js/alert.js"></script>
-    <script>
-        const postId = window.location.pathname.split('/').pop();
-        let PAGE = 0, SIZE = 100;
+<!-- footer -->
+<footer class="bg-light text-center text-lg-start mt-5 border-top">
+    <div class="container p-4">
+        <p class="text-center mb-0 text-muted">
+            © 2025 Uminity. All rights reserved.
+        </p>
+    </div>
+</footer>
 
-        window.onload = function () {
-            initUtil();       // CSRF 토큰 초기화
-            loadNavbar();     // 네비 로드
-            postDetail();     // 게시글 데이터 로드
-            listComments();   // 댓글 리스트 로드
-            document.getElementById('commentSubmit')
-                .addEventListener('click', createComment);
-        };
+<script src="/assets/js/util.js"></script>
+<script src="/assets/js/alert.js"></script>
+<script>
+    const postId = window.location.pathname.split('/').pop();
+    let PAGE = 0, SIZE = 100;
 
-        async function postDetail() {
-            try {
-                const res = await fetch(`/api/posts/${postId}`);
-                if (!res.ok) throw res;
-                const post = await res.json();
+    window.onload = function () {
+        initUtil();       // CSRF 토큰 초기화
+        loadNavbar();     // 네비 로드
+        postDetail();     // 게시글 데이터 로드
+        listComments();   // 댓글 리스트 로드
+        document.getElementById('commentSubmit')
+            .addEventListener('click', createComment);
+    };
 
-                const postDate = formatDate(post.createdAt);
-                document.getElementById('postDetail').innerHTML = `
+    async function postDetail() {
+        try {
+            const res = await fetch(`/api/posts/${postId}`,
+                {
+                    method: 'GET',
+                    credentials: 'include' // ← 이게 필수!
+                }
+            );
+            if (!res.ok) throw res;
+            const post = await res.json();
+
+            const postDate = formatDate(post.createdAt);
+            document.getElementById('postDetail').innerHTML = `
                     <div class="card-body">
                         <h2 class="card-title">${post.title}</h2>
                         <p class="text-muted mb-2">
@@ -99,74 +107,74 @@
                     </div>
                 `;
 
-                document.getElementById('btnDelete')
-                    .addEventListener('click', deletePost);
-            } catch (err) {
-                console.error('게시글 로드 오류:', err);
-            }
+            document.getElementById('btnDelete')
+                .addEventListener('click', deletePost);
+        } catch (err) {
+            console.error('게시글 로드 오류:', err);
         }
+    }
 
-        async function deletePost() {
-            const confirmed = await showConfirm('이 게시글을 삭제하시겠습니까?', '게시글 삭제', '삭제하기', '취소');
-            if (!confirmed) return;
+    async function deletePost() {
+        const confirmed = await showConfirm('이 게시글을 삭제하시겠습니까?', '게시글 삭제', '삭제하기', '취소');
+        if (!confirmed) return;
 
-            try {
-                const res = await util.fetchWithCsrf(`/api/posts/${postId}`, {method: 'DELETE'});
-                if (res.ok) {
-                    showSuccessAlert('게시글이 성공적으로 삭제되었습니다.');
-                    setTimeout(() => window.location.href = '/', 850);
-                } else {
-                    showWarningAlert('본인 게시글만 삭제할 수 있습니다..');
-                }
-            } catch (err) {
-                console.error('삭제 오류:', err);
-                showErrorAlert('서버 오류가 발생했습니다.');
-            }
-        }
-
-        // 댓글
-        // 댓글 불러오기
-        async function listComments() {
-            let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
-            let response = await fetch(url);
-            if (response.ok) {
-                let data = await response.json();
-                PAGE = data.page, SIZE = data.size;
-                total_elements = data.totalElements, total_pages = data.totalPages;
-                let comments = data.content;
-
-                // 댓글 개수 (대댓글 포함)
-                let totalWithReplies = comments.reduce((total, comment) => {
-                    return total + 1 + (comment.children ? comment.children.length : 0);
-                }, 0);
-                document.querySelector("#commentCount").innerText = `(${totalWithReplies})`;
-
-                let commentDiv = document.querySelector("#commentDiv");
-                commentDiv.innerHTML = "";  // 초기화
-
-                // 댓글 렌더링
-                comments.forEach(comment => {
-                    // 댓글 본문 추가 (최신순)
-                    let commentHtml = generateCommentHtml(comment);
-                    commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
-
-                    // 대댓글이 있는 경우 최신순으로 추가
-                    if (comment.children && comment.children.length > 0) {
-                        // 대댓글도 최신순으로
-                        comment.children.reverse().forEach(reply => {
-                            let replyHtml = generateReplyHtml(reply);
-                            document.querySelector(`#comment-${comment.commentId}`).insertAdjacentHTML("afterend", replyHtml);
-                        });
-                    }
-                });
+        try {
+            const res = await util.fetchWithCsrf(`/api/posts/${postId}`, {method: 'DELETE'});
+            if (res.ok) {
+                showSuccessAlert('게시글이 성공적으로 삭제되었습니다.');
+                setTimeout(() => window.location.href = '/', 850);
             } else {
-                console.error("HTTP Error:", response.status);
+                showWarningAlert('본인 게시글만 삭제할 수 있습니다..');
             }
+        } catch (err) {
+            console.error('삭제 오류:', err);
+            showErrorAlert('서버 오류가 발생했습니다.');
         }
+    }
 
-        // 1. 댓글 HTML 생성 함수
-        function generateCommentHtml(comment) {
-            return `
+    // 댓글
+    // 댓글 불러오기
+    async function listComments() {
+        let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
+        let response = await fetch(url);
+        if (response.ok) {
+            let data = await response.json();
+            PAGE = data.page, SIZE = data.size;
+            total_elements = data.totalElements, total_pages = data.totalPages;
+            let comments = data.content;
+
+            // 댓글 개수 (대댓글 포함)
+            let totalWithReplies = comments.reduce((total, comment) => {
+                return total + 1 + (comment.children ? comment.children.length : 0);
+            }, 0);
+            document.querySelector("#commentCount").innerText = `(${totalWithReplies})`;
+
+            let commentDiv = document.querySelector("#commentDiv");
+            commentDiv.innerHTML = "";  // 초기화
+
+            // 댓글 렌더링
+            comments.forEach(comment => {
+                // 댓글 본문 추가 (최신순)
+                let commentHtml = generateCommentHtml(comment);
+                commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
+
+                // 대댓글이 있는 경우 최신순으로 추가
+                if (comment.children && comment.children.length > 0) {
+                    // 대댓글도 최신순으로
+                    comment.children.reverse().forEach(reply => {
+                        let replyHtml = generateReplyHtml(reply);
+                        document.querySelector(`#comment-${comment.commentId}`).insertAdjacentHTML("afterend", replyHtml);
+                    });
+                }
+            });
+        } else {
+            console.error("HTTP Error:", response.status);
+        }
+    }
+
+    // 1. 댓글 HTML 생성 함수
+    function generateCommentHtml(comment) {
+        return `
 		        <div class="comment-item mb-3 rounded border p-3" id="comment-${comment.commentId}">
 		            <div class="d-flex justify-content-between align-items-center mb-2">
 		                <div>
@@ -199,113 +207,113 @@
 		            </div>
 		        </div>
 		    `;
+    }
+
+    // 2. 댓글 작성
+    async function createComment() {
+        const content = document.getElementById('commentInput').value.trim();
+        const userJson = sessionStorage.getItem('user');
+        if (!content) return showWarningAlert('댓글을 입력하세요.');
+
+        const userId = userJson ? JSON.parse(userJson).userId : null;
+        if (userId == null) {
+            showWarningAlert('로그인 후 이용 가능합니다.');
+            return;
         }
 
-        // 2. 댓글 작성
-        async function createComment() {
-            const content = document.getElementById('commentInput').value.trim();
-            const userJson = sessionStorage.getItem('user');
-            if (!content) return showWarningAlert('댓글을 입력하세요.');
-
-            const userId = userJson ? JSON.parse(userJson).userId : null;
-            if (userId == null) {
-                showWarningAlert('로그인 후 이용 가능합니다.');
-                return;
+        try {
+            const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({postId, userId, content})
+            });
+            if (res.ok) {
+                document.getElementById('commentInput').value = '';
+                listComments();
+            } else {
+                showErrorAlert('댓글 작성에 실패했습니다.');
             }
-
-            try {
-                const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({postId, userId, content})
-                });
-                if (res.ok) {
-                    document.getElementById('commentInput').value = '';
-                    listComments();
-                } else {
-                    showErrorAlert('댓글 작성에 실패했습니다.');
-                }
-            } catch (err) {
-                console.error('댓글 작성 오류:', err);
-                showErrorAlert('서버 오류가 발생했습니다.');
-            }
+        } catch (err) {
+            console.error('댓글 작성 오류:', err);
+            showErrorAlert('서버 오류가 발생했습니다.');
         }
+    }
 
 
-        // 3. 댓글 수정 활성화
-        async function enableEdit(commentId) {
-            let contentDiv = document.getElementById(`content-${commentId}`);
-            let originalContent = contentDiv.textContent.trim();
+    // 3. 댓글 수정 활성화
+    async function enableEdit(commentId) {
+        let contentDiv = document.getElementById(`content-${commentId}`);
+        let originalContent = contentDiv.textContent.trim();
 
-            // 원래 버튼 숨기기
-            document.querySelector(`#editBtn-${commentId}`).style.display = "none";
-            document.querySelector(`#deleteBtn-${commentId}`).style.display = "none";
+        // 원래 버튼 숨기기
+        document.querySelector(`#editBtn-${commentId}`).style.display = "none";
+        document.querySelector(`#deleteBtn-${commentId}`).style.display = "none";
 
-            contentDiv.innerHTML = `
+        contentDiv.innerHTML = `
 	            <textarea class="form-control mb-2">${originalContent}</textarea>
 	            <div class="d-flex justify-content-end">
 	                <button class="btn btn-success btn-sm me-2" onclick="saveComment(${commentId})">저장</button>
 	                <button class="btn btn-secondary btn-sm" onclick="cancelEdit(${commentId}, '${originalContent}')">취소</button>
 	            </div>
 	        `;
-        }
+    }
 
-        // 4. 댓글 수정 진행
-        async function saveComment(commentId) {
-            const contentDiv = document.getElementById(`content-${commentId}`);
-            const updated = contentDiv.querySelector('textarea').value.trim();
-            if (!updated) return showWarningAlert('내용을 입력하세요.');
-            try {
-                const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments/${commentId}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content: updated})
-                });
-                if (res.ok) {
-                    contentDiv.innerHTML = `<p class="mb-0">${updated}</p>`;
-                    document.getElementById(`editBtn-${commentId}`).style.display = 'inline-block';
-                    document.getElementById(`deleteBtn-${commentId}`).style.display = 'inline-block';
-                } else {
-                    showErrorAlert('댓글 수정에 실패했습니다.');
-                }
-            } catch (err) {
-                console.error('댓글 수정 오류:', err);
-                showErrorAlert('서버 오류가 발생했습니다.');
+    // 4. 댓글 수정 진행
+    async function saveComment(commentId) {
+        const contentDiv = document.getElementById(`content-${commentId}`);
+        const updated = contentDiv.querySelector('textarea').value.trim();
+        if (!updated) return showWarningAlert('내용을 입력하세요.');
+        try {
+            const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments/${commentId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content: updated})
+            });
+            if (res.ok) {
+                contentDiv.innerHTML = `<p class="mb-0">${updated}</p>`;
+                document.getElementById(`editBtn-${commentId}`).style.display = 'inline-block';
+                document.getElementById(`deleteBtn-${commentId}`).style.display = 'inline-block';
+            } else {
+                showErrorAlert('댓글 수정에 실패했습니다.');
             }
+        } catch (err) {
+            console.error('댓글 수정 오류:', err);
+            showErrorAlert('서버 오류가 발생했습니다.');
         }
+    }
 
-        // 5. 댓글 수정 취소
-        function cancelEdit(commentId, originalContent) {
-            const contentDiv = document.getElementById(`content-${commentId}`);
-            // 원래 내용 보여주기
-            contentDiv.innerHTML = `<p>${originalContent}</p>`;
-            // 원래 버튼 보여주기
-            document.querySelector(`#editBtn-${commentId}`).style.display = "block";
-            document.querySelector(`#deleteBtn-${commentId}`).style.display = "block";
-        }
+    // 5. 댓글 수정 취소
+    function cancelEdit(commentId, originalContent) {
+        const contentDiv = document.getElementById(`content-${commentId}`);
+        // 원래 내용 보여주기
+        contentDiv.innerHTML = `<p>${originalContent}</p>`;
+        // 원래 버튼 보여주기
+        document.querySelector(`#editBtn-${commentId}`).style.display = "block";
+        document.querySelector(`#deleteBtn-${commentId}`).style.display = "block";
+    }
 
-        // 6. 댓글 삭제
-        async function deleteComment(commentId) {
-            const confirmed = await showConfirm('이 댓글을 삭제하시겠습니까?', '댓글 삭제', '삭제하기', '취소');
-            if (!confirmed) return;
-            try {
-                const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments/${commentId}`, {method: 'DELETE'});
-                if (res.ok) {
-                    showSuccessAlert('댓글이 삭제되었습니다.');
-                    listComments();
-                } else {
-                    showWarningAlert('본인 댓글만 삭제할 수 있습니다..');
-                }
-            } catch (err) {
-                console.error('댓글 삭제 오류:', err);
-                showErrorAlert('서버 오류가 발생했습니다.');
+    // 6. 댓글 삭제
+    async function deleteComment(commentId) {
+        const confirmed = await showConfirm('이 댓글을 삭제하시겠습니까?', '댓글 삭제', '삭제하기', '취소');
+        if (!confirmed) return;
+        try {
+            const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments/${commentId}`, {method: 'DELETE'});
+            if (res.ok) {
+                showSuccessAlert('댓글이 삭제되었습니다.');
+                listComments();
+            } else {
+                showWarningAlert('본인 댓글만 삭제할 수 있습니다..');
             }
+        } catch (err) {
+            console.error('댓글 삭제 오류:', err);
+            showErrorAlert('서버 오류가 발생했습니다.');
         }
+    }
 
-        // 대댓글
-        // 1. 대댓글 HTML 생성 함수
-        function generateReplyHtml(reply) {
-            return `
+    // 대댓글
+    // 1. 대댓글 HTML 생성 함수
+    function generateReplyHtml(reply) {
+        return `
 		        <div class="reply-item mb-3 rounded border p-3 ms-4" id="reply-${reply.commentId}">
 		            <div class="d-flex justify-content-between align-items-center mb-2">
 		                <div>
@@ -328,17 +336,43 @@
 		            </div>
 		        </div>
 		    `;
-        }
+    }
 
-        // 2. 대댓글 작성 활성화 (토글)
-        function toggleReplyForm(commentId) {
-            let replyForm = document.getElementById(`replyForm-${commentId}`);
-            if (replyForm.style.display === 'none') {
-                replyForm.style.display = 'block';
-            } else {
-                replyForm.style.display = 'none';
-            }
+    // 2. 대댓글 작성 활성화 (토글)
+    function toggleReplyForm(commentId) {
+        let replyForm = document.getElementById(`replyForm-${commentId}`);
+        if (replyForm.style.display === 'none') {
+            replyForm.style.display = 'block';
+        } else {
+            replyForm.style.display = 'none';
         }
+    }
+
+
+    // 3. 대댓글 작성
+    async function createReplyComment(parentId) {
+        const content = document.getElementById(`replyCommentInput-${parentId}`).value.trim();
+        const userJson = sessionStorage.getItem('user');
+        if (!content) return showWarningAlert('대댓글을 입력하세요.');
+
+        const userId = userJson ? JSON.parse(userJson).userId : null;
+        try {
+            const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({postId, userId, content, parentId})
+            });
+            if (res.ok) {
+                document.getElementById('commentInput').value = '';
+                listComments();
+            } else {
+                showErrorAlert('댓글 작성에 실패했습니다.');
+            }
+        } catch (err) {
+            console.error('댓글 작성 오류:', err);
+            showErrorAlert('서버 오류가 발생했습니다.');
+        }
+    }
 
 
         // 3. 대댓글 작성

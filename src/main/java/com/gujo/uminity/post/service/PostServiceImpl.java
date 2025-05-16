@@ -1,5 +1,7 @@
 package com.gujo.uminity.post.service;
 
+import static java.time.LocalDateTime.now;
+
 import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,7 +119,11 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
 
-        if (!post.getUser().getUserId().equals(userId)) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+
+        if (!post.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }
         postRepository.delete(post);
@@ -124,11 +132,18 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void incrementViewCountIfNew(Long postId, boolean isNew) {
-        if (isNew) {
+        if (!isNew) return; // 이미 본 게시글이면 패스
+
+        try {
             int updated = postRepository.incrementViewCount(postId);
+            // 조회수 증가 실패해도 조회는 가능해야 하므로 여기서 예외 X
             if (updated == 0) {
-                throw new IllegalArgumentException("존재하지 않는 게시글: " + postId);
+                System.out.println("[INFO] 조회수 증가 실패: 존재하지 않는 게시글 postId=" + postId);
+                // 증가 실패는 로깅만 하고 넘긴다
             }
+        } catch (Exception e) {
+            // 증가 중 문제가 생겨도 조회는 가능해야 함
+            System.out.println("[ERROR] 조회수 증가 중 예외 발생: " + e.getMessage());
         }
     }
 }

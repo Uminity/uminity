@@ -91,14 +91,7 @@ public class PostServiceImpl implements PostService {
 //        post.setCreatedAt(LocalDateTime.now());
 //        post.setViewCnt(0);
 
-        Post post = Post.builder()
-                .user(user)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .createdAt(now())
-                .viewCnt(0)
-                .build();
-
+        Post post = Post.of(user, request.getTitle(), request.getContent());
         Post saved = postRepository.save(post);
         return PostResponseDto.fromEntity(saved);
     }
@@ -114,8 +107,8 @@ public class PostServiceImpl implements PostService {
             throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
         }
 
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
+        post.updateTitle(request.getTitle());
+        post.updateContent(request.getContent());
 
         return PostResponseDto.fromEntity(post);
     }
@@ -133,19 +126,25 @@ public class PostServiceImpl implements PostService {
         if (!post.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }
-
         postRepository.delete(post);
     }
 
     @Override
     @Transactional
-    public void incrementViewCount(Long postId) {
-//        Post post = postRepository.findById(postId)
-//                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
-//        // 엔티티 성공적으로 로드하면 +1해주자
-//        post.setViewCnt(post.getViewCnt() + 1);
-//        무조건 postId가 있다고 생각해서 쿼리문을 업데이트만 사용하게끔
-        postRepository.incrementViewCount(postId);
+    public void incrementViewCountIfNew(Long postId, boolean isNew) {
+        if (!isNew) return; // 이미 본 게시글이면 패스
+
+        try {
+            int updated = postRepository.incrementViewCount(postId);
+            // 조회수 증가 실패해도 조회는 가능해야 하므로 여기서 예외 X
+            if (updated == 0) {
+                System.out.println("[INFO] 조회수 증가 실패: 존재하지 않는 게시글 postId=" + postId);
+                // 증가 실패는 로깅만 하고 넘긴다
+            }
+        } catch (Exception e) {
+            // 증가 중 문제가 생겨도 조회는 가능해야 함
+            System.out.println("[ERROR] 조회수 증가 중 예외 발생: " + e.getMessage());
+        }
     }
 }
 
@@ -156,4 +155,5 @@ CRUD 만들고 났고 조회랑 수정은 있는지 여부를 확인해야되고
 JPA 작업을 하나의 트랜잭션으로 묶고 자동으로 롤백해서
 
 연관관계로 UserRepository 추가해서 반영
+도메인 메서드 하나만 노출하면 그 메서드로 수정한다.
  */

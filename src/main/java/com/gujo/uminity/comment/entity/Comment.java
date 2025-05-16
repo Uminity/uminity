@@ -3,10 +3,8 @@ package com.gujo.uminity.comment.entity;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,9 +13,9 @@ import java.util.List;
 @Entity
 @Table(name = "comments")
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 public class Comment {
 
     @Id
@@ -42,16 +40,29 @@ public class Comment {
     private List<Comment> children = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
+    @NotBlank(message = "댓글은 비어있을 수 없습니다.")
     private String content;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    public static Comment of(Post post, User user, String content, Comment parent) {
+        return Comment.builder()
+                .post(post)
+                .user(user)
+                .content(content)
+                .parent(parent)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
     public void updateContent(String newContent) {
-        if (newContent == null || newContent.isBlank()) {
-            throw new IllegalArgumentException("댓글 내용은 비어 있을 수 없습니다.");
-        }
         this.content = newContent;
+    }
+
+    public void addChild(Comment reply) {
+        this.children.add(reply);
+        reply.parent = this;
     }
 }
 

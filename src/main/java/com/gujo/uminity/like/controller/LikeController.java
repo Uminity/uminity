@@ -19,7 +19,7 @@ public class LikeController {
 
     @PostMapping("/{postId}/like")
     public ResponseEntity<ToggleLikeResponse> toggleLike(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @AuthenticationPrincipal MyUserDetails principal) {
 //        ID 추출
         String userId = principal.getUserId();
@@ -30,7 +30,7 @@ public class LikeController {
 
     @GetMapping("/{postId}/likers")
     public ResponseEntity<PageResponse<String>> getLikerNames(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             Pageable pageable) {
         PageResponse<String> response = likeService.getLikerNamesByPostId(postId, pageable);
         return ResponseEntity.ok(response);

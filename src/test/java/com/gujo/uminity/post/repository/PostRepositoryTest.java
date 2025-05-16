@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
-import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -38,21 +37,22 @@ class PostRepositoryTest {
                 .build()
         );
         postRepository.saveAll(List.of(
-                new Post(null, userTest, "제목1", "내용1", now(), 0),
-                new Post(null, userTest, "제목2", "내용2", now(), 0),
-                new Post(null, userTest, "제목3", "내용3", now(), 0)
+                Post.of(userTest, "제목1", "내용1"),
+                Post.of(userTest, "제목2", "내용2"),
+                Post.of(userTest, "제목3", "내용3")
+
         ));
     }
 
     @Test
     @DisplayName("저장하고 조회까지")
     void 저장조회() {
-        Post p = new Post(null, userTest, "테스트제목", "테스트 내용", now(), 0);
+        Post p = Post.of(userTest, "테스트 제목", "테스트 내용");
         Post saved = postRepository.save(p);
 
         Post found = postRepository.findById(saved.getPostId())
                 .orElseThrow(() -> new AssertionError("조회안됨"));
-        assertThat(found.getTitle()).isEqualTo("테스트제목");
+        assertThat(found.getTitle()).isEqualTo("테스트 제목");
         assertThat(found.getContent()).isEqualTo("테스트 내용");
     }
 

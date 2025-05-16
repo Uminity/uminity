@@ -22,11 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.time.LocalDateTime.now;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,65 +34,46 @@ class PostServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
-    // 가짜 수집
 
     @InjectMocks
     private PostServiceImpl postService;
-
 
     private User userTest;
     private Post postTest;
 
     @BeforeEach
     void 설정() {
-        // 작성자
         userTest = User.builder()
-                .userId(String.valueOf(UUID.randomUUID()))
+                .userId(UUID.randomUUID().toString())
                 .name("테스트 유저")
-                .email("test@tset.com")
+                .email("test@test.com")
                 .password("password")
                 .phone("010-1111-1111")
                 .build();
-        postTest = Post.builder()
-                .postId(1L)
-                .user(userTest)
-                .title("타이틀 제목")
-                .content("내용")
-                .createdAt(now())
-                .viewCnt(0)
-                .build();
+        postTest = Post.of(userTest, "타이틀 제목", "내용");
     }
 
     @Test
-    @DisplayName("엔티티를 DTO로 반환")
+    @DisplayName("게시글 생성 성공: DTO 반환 검증")
     void 게시글생성성공() {
-        // given
         PostCreateRequest req = new PostCreateRequest();
         req.setTitle("제목");
         req.setContent("내용");
 
         given(userRepository.findById(userTest.getUserId()))
                 .willReturn(Optional.of(userTest));
-
         given(postRepository.save(any(Post.class)))
                 .willReturn(postTest);
-        // when
+
         PostResponseDto dto = postService.createPost(req, userTest.getUserId());
 
-        // then
         assertThat(dto.getPostId()).isEqualTo(postTest.getPostId());
-
-        assertThat(dto.getAuthorName()).isEqualTo(postTest.getUser().getName());
         assertThat(dto.getAuthorName()).isEqualTo(userTest.getName());
     }
-    /*
-    서비스 -> 레포지토리 -> DTO 매핑 순서
-     */
 
     @Test
-    @DisplayName("존재하는 ID면 DTO 반환")
+    @DisplayName("게시글 조회 성공: 존재하는 ID")
     void 게시글조회성공() {
-
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
 
@@ -106,7 +84,7 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("없는 ID면 IllegalArgumentException 발생 NOT FOUND")
+    @DisplayName("게시글 조회 실패: 없는 ID 예외 발생")
     void 게시글조회실패() {
         given(postRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
@@ -117,7 +95,7 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("존재하는 ID면 title/content 변경 후 DTO 반환")
+    @DisplayName("게시글 수정 성공: 제목/내용 변경")
     void 게시글수정성공() {
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
@@ -133,9 +111,8 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("없는 ID면 IllegalArgumentException 발생")
+    @DisplayName("게시글 수정 실패: 다른 사용자 권한 예외 발생")
     void 게시글수정실패() {
-
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
 
@@ -143,15 +120,13 @@ class PostServiceImplTest {
         req.setTitle("타이틀");
         req.setContent("내용");
 
-        assertThatThrownBy(() ->
-                postService.updatePost(1L, req, "other-id")
-        )
+        assertThatThrownBy(() -> postService.updatePost(1L, req, "other-id"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("본인만 수정할 수 있습니다.");
     }
 
     @Test
-    @DisplayName("작성자면 정상 호출")
+    @DisplayName("게시글 삭제 성공: 작성자 권한")
     void 게시글삭제성공() {
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
@@ -162,35 +137,30 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("작성자가 아니라면 예외")
+    @DisplayName("게시글 삭제 실패: 다른 사용자 권한 예외 발생")
     void 게시글삭제실패() {
         given(postRepository.findById(1L))
                 .willReturn(Optional.of(postTest));
 
-        assertThatThrownBy(() ->
-                postService.deletePost(1L, "another-id")
-        )
+        assertThatThrownBy(() -> postService.deletePost(1L, "another-id"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("본인만 삭제할 수 있습니다.");
     }
 
     @Test
-    @DisplayName("존재하지않는 ID면 예외")
+    @DisplayName("게시글 삭제 실패: 없는 ID 예외 발생")
     void 게시글삭제실패_없음() {
         given(postRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                postService.deletePost(999L, userTest.getUserId())
-        )
+        assertThatThrownBy(() -> postService.deletePost(999L, userTest.getUserId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("존재 하지 않는 게시글: " + 999L);
     }
 
     @Test
-    @DisplayName("SEARCH_TYPE=ALL알 때 검색 호출")
+    @DisplayName("모든 게시글 조회: SEARCH_TYPE=ALL 호출 검증")
     void 모든게시글조회() {
-        // given
         PostListRequest req = new PostListRequest();
         req.setKeyword("키워드");
         req.setPage(0);
@@ -202,29 +172,45 @@ class PostServiceImplTest {
                 PageRequest.of(0, 10, Sort.by("createdAt").descending()),
                 1
         );
-        given(postRepository
-                .findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                        eq("키워드"), eq("키워드"), any(Pageable.class)))
-                .willReturn(stubPage);
+        given(postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+                eq("키워드"), eq("키워드"), any(Pageable.class)
+        )).willReturn(stubPage);
 
-        // When
         PageResponse<PostResponseDto> page = postService.listPosts(req);
 
-        // Then: totalElements, DTO 매핑 검증
         assertThat(page.getTotalElements()).isEqualTo(1);
-        assertThat(page.getContent().get(0).getPostId())
-                .isEqualTo(postTest.getPostId());
+        assertThat(page.getContent().get(0).getPostId()).isEqualTo(postTest.getPostId());
     }
 
     @Test
-    @DisplayName("레포지토리에서만든 JPQL 메소드")
-    void 조회수증가쿼리요청() {
-        // given
+    @DisplayName("isNew=true일 때 조회수 증가 호출")
+    void 조회수증가_신규호출() {
         Long postId = 42L;
         given(postRepository.incrementViewCount(postId)).willReturn(1);
-        // when
-        postService.incrementViewCount(postId);
-        // then
+
+        postService.incrementViewCountIfNew(postId, true);
+
         then(postRepository).should().incrementViewCount(postId);
+    }
+
+    @Test
+    @DisplayName("isNew=false일 때 조회수 증가 미호출")
+    void 조회수증가_미호출() {
+        Long postId = 42L;
+
+        postService.incrementViewCountIfNew(postId, false);
+
+        then(postRepository).should(never()).incrementViewCount(anyLong());
+    }
+
+    @Test
+    @DisplayName("isNew=true이고 존재하지 않는 게시글이면 예외 발생")
+    void 조회수증가_예외() {
+        Long postId = 42L;
+        given(postRepository.incrementViewCount(postId)).willReturn(0);
+
+        assertThatThrownBy(() -> postService.incrementViewCountIfNew(postId, true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("존재하지 않는 게시글: " + postId);
     }
 }

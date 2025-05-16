@@ -54,10 +54,6 @@ public class Post {
     public void updateContent(String newContent) {
         this.content = newContent;
     }
-
-    public void increaseViewCount() {
-        this.viewCnt++;
-    }
 }
 
 

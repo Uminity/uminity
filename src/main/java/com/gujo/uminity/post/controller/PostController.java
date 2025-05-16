@@ -37,7 +37,7 @@ public class PostController {
     // 2. 단건
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             @ViewCookie boolean isNew) {
 
         postService.incrementViewCountIfNew(postId, isNew);

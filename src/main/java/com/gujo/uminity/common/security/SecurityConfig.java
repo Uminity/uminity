@@ -1,8 +1,9 @@
 package com.gujo.uminity.common.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -11,18 +12,21 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           MyAuthenticationSuccessHandler successHandler, MyAuthenticationFailureHandler failureHandler) throws Exception {
+    private final MyAuthenticationSuccessHandler successHandler;
+    private final MyAuthenticationFailureHandler failureHandler;
+    private final MyUserDetailsService userDetailsService;
 
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authenticationProvider(daoAuthenticationProvider());
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
-                .anyRequest().authenticated());
-
+                .anyRequest().permitAll()
+        );
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -37,15 +41,25 @@ public class SecurityConfig {
         );
 
         http.logout(logout -> logout
-                .logoutUrl("/logout")                // 로그아웃 처리 엔드포인트 (디폴트도 POST /logout)
-                .logoutSuccessUrl("/login.html")     // 로그아웃 후 리다이렉트할 페이지
-                .deleteCookies("JSESSIONID")         // 세션 쿠키 삭제
-                .invalidateHttpSession(true)         // 세션 무효화
-                .clearAuthentication(true)           // SecurityContext 비우기
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login.html")
+                .deleteCookies("JSESSIONID")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .permitAll()
         );
 
         return http.build();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(new BCryptPasswordEncoder());
+        // UsernameNotFoundException 메시지를 숨기지 않도록 설정
+        provider.setHideUserNotFoundExceptions(false);
+        return provider;
     }
 
     @Bean

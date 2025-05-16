@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
     <title>Uminity</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
 <body>
@@ -20,40 +21,47 @@
     <div id="nav-placeholder" class="pb-5"></div>
 
     <!-- ② Hot Issues -->
-    <div class="container mb-4">
-        <h4 class="text-danger fw-bold mb-3">🔥 Hot Issues</h4>
-        <ul class="list-group" id="hotList">
-            <!-- JS가 상위 3개 글을 여기다 삽입합니다 -->
-        </ul>
+    <div class="container mb-5">
+        <h4 class="hot-issues-title text-danger fw-bold mb-3">🔥 Hot Issues</h4>
+        <div class="card shadow-sm rounded-4 overflow-hidden">
+            <ul class="list-group list-group-flush" id="hotList">
+                <!-- JS가 상위 3개 글을 여기다 삽입합니다 -->
+            </ul>
+        </div>
     </div>
 
     <!-- ③ 게시판 -->
     <div class="container">
-        <div class="row mb-3">
-            <div class="col">
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-3 mb-2 mb-md-0">
                 <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">옵션
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-filter"></i> 표시 개수
                     </button>
-                    <ul class="dropdown-menu" id="pageOptionMenu">
+                    <ul class="dropdown-menu shadow-sm" id="pageOptionMenu">
                         <li><a class="dropdown-item" href="#" data-value="3">3개씩 보기</a></li>
                         <li><a class="dropdown-item" href="#" data-value="5">5개씩 보기</a></li>
                         <li><a class="dropdown-item" href="#" data-value="10">10개씩 보기</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="input-group col mb-3">
-                <button class="btn btn-outline-secondary dropdown-toggle" id="searchTypeButton"
-                        type="button" data-bs-toggle="dropdown" aria-expanded="false">제목
-                </button>
-                <ul class="dropdown-menu" id="searchType">
-                    <li><a class="dropdown-item" href="#" data-value="TITLE">제목</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="CONTENT">내용</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="ALL">제목+내용</a></li>
-                </ul>
-                <input type="hidden" id="selectedSearchType" value="TITLE">
-                <input type="text" class="form-control" id="keyword" placeholder="검색어를 입력하세요">
-                <button class="btn btn-primary" type="button" id="btnSearch">검색</button>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <button class="btn btn-outline-primary dropdown-toggle" id="searchTypeButton"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">제목
+                    </button>
+                    <ul class="dropdown-menu shadow-sm" id="searchType">
+                        <li><a class="dropdown-item" href="#" data-value="TITLE">제목</a></li>
+                        <li><a class="dropdown-item" href="#" data-value="CONTENT">내용</a></li>
+                        <li><a class="dropdown-item" href="#" data-value="ALL">제목+내용</a></li>
+                    </ul>
+                    <input type="hidden" id="selectedSearchType" value="TITLE">
+                    <input type="text" class="form-control" id="keyword" placeholder="검색어를 입력하세요">
+                    <button class="btn btn-primary" type="button" id="btnSearch">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -73,10 +81,12 @@
         </div>
 
         <div class="d-flex justify-content-end mb-4">
-            <a href="/postForm" class="btn btn-primary fw-bold rounded-3">글 작성</a>
+            <a href="/postForm" class="btn btn-primary fw-bold rounded-3">
+                <i class="bi bi-pencil-square"></i> 글 작성
+            </a>
         </div>
 
-        <div id="paginationWrapper"></div>
+        <div id="paginationWrapper" class="d-flex justify-content-center"></div>
     </div>
 
     <!-- footer -->
@@ -87,6 +97,7 @@
     </footer>
 
     <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/alert.js"></script>
     <script>
         window.onload = function () {
             // 1) 공통 네비 로드
@@ -140,36 +151,7 @@
         };
 
         let SIZE = 10, PAGE = 0, SEARCH_TYPE = 'TITLE', SEARCH_WORD = '';
-        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 5, CURRENT_PAGE_INDEX = 1;
-
-        function postList() {
-            const url = "/api/posts"
-                + "?page=" + PAGE
-                + "&size=" + SIZE
-                + "&searchType=" + SEARCH_TYPE
-                + "&keyword=" + encodeURIComponent(SEARCH_WORD);
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById("postList");
-                    tbody.innerHTML = '';
-                    data.content.forEach(post => {
-                        tbody.innerHTML += `
-              <tr>
-                <td class="text-center">${post.postId}</td>
-                <td><a href="/postDetail/${post.postId}"
-                       class="text-decoration-none text-primary fw-semibold">${post.title}</a></td>
-                <td class="text-center">${post.authorName}</td>
-                <td class="text-center">${post.createdAt}</td>
-                <td class="text-center">${post.viewCnt}</td>
-              </tr>`;
-                    });
-                    makePaginationHTML(SIZE, data.totalPages, CURRENT_PAGE_INDEX,
-                        data.totalElements, "paginationWrapper");
-                })
-                .catch(err => console.error("게시판 로드 실패:", err));
-        }
-
+        let TOTAL_POST_COUNT = 0, PAGE_LINK_COUNT = 10, CURRENT_PAGE_INDEX = 1;
 
         // 게시글 목록 가져오기
         async function postList() {

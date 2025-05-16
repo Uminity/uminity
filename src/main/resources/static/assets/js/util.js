@@ -1,31 +1,4 @@
 // UI 초기화: 세션스토리지 user 확인 후 nav toggle
-function initUI() {
-    const userJson = sessionStorage.getItem("user");
-    if (userJson) {
-        const user = JSON.parse(userJson);
-        document.querySelector("#navUser .nav-link")
-            .textContent = `${user.name}님 환영합니다.`;
-        showLoggedIn();
-    } else {
-        showLoginOnly();
-    }
-}
-
-function showLoginOnly() {
-    document.getElementById("navLogin").style.display = "";
-    document.getElementById("navUser").style.display = "none";
-    document.getElementById("navMyPage").style.display = "none";
-    document.getElementById("navLogout").style.display = "none";
-}
-
-function showLoggedIn() {
-    document.getElementById("navLogin").style.display = "none";
-    document.getElementById("navUser").style.display = "";
-    document.getElementById("navMyPage").style.display = "";
-    document.getElementById("navLogout").style.display = "";
-}
-
-
 function loadNavbar() {
     fetch('/assets/nav.html')
         .then(res => res.text())
@@ -45,6 +18,46 @@ function loadNavbar() {
 
         })
         .catch(err => console.error('네비 로드 실패:', err));
+}
+
+async function initUI() {
+    try {
+        // 매번 최신 유저 정보 조회
+        const res = await fetch('/api/v1/myPage', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('로그인이 되지 않았습니다.');
+
+        const user = await res.json();
+
+        // 세션 스토리지에 최신 정보 저장
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // 네비에 이름 반영
+        document.querySelector('#navUser .nav-link').textContent = `${user.name}님`;
+
+        // 로그인 상태 UI 표시
+        showLoggedIn();
+    } catch (err) {
+        // 로그인 안 된 상태라면 세션 지우고 로그인 버튼만 보여주기
+        sessionStorage.removeItem('user');
+        showLoginOnly();
+    }
+}
+
+function showLoginOnly() {
+    document.getElementById("navLogin").style.display = "";
+    document.getElementById("navUser").style.display = "none";
+    document.getElementById("navMyPage").style.display = "none";
+    document.getElementById("navLogout").style.display = "none";
+}
+
+function showLoggedIn() {
+    document.getElementById("navLogin").style.display = "none";
+    document.getElementById("navUser").style.display = "";
+    document.getElementById("navMyPage").style.display = "";
+    document.getElementById("navLogout").style.display = "";
 }
 
 async function logout(e) {
@@ -99,7 +112,7 @@ function makePaginationHTML(listRowCount, pageLinkCount, currentPageIndex, total
     }
 
     let next;
-    if (endPageIndex > pageCount) {
+    if (endPageIndex > pageLinkCount) {
         endPageIndex = pageCount
         next = false;
     } else {

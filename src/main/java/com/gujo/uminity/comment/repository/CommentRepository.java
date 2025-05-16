@@ -1,6 +1,7 @@
 package com.gujo.uminity.comment.repository;
 
 import com.gujo.uminity.comment.entity.Comment;
+import com.gujo.uminity.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findTop3ByParent_CommentIdOrderByCreatedAtDesc(Long parentId);
 
     long countByParent_CommentId(Long parentId);
+
+    Page<Comment> findAllByUser_UserId(String userId, Pageable pageable);
+
+    String user(User user);
 }
 
 

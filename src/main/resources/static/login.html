@@ -11,34 +11,52 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <title>Uminity</title>
+    <!-- head 태그 내에 부트스트랩 아이콘 추가 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
 <body>
+    <!-- 기존 로그인 폼을 아래 코드로 교체 -->
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow rounded-4 p-4" style="max-width: 400px; width: 100%;">
-            <h2 class="text-center text-primary mb-4">로그인</h2>
+            <div class="text-center mb-4">
+                <h2 class="text-primary mb-2">로그인</h2>
+                <p class="text-muted">Uminity에 오신 것을 환영합니다</p>
+            </div>
             <form>
                 <div class="mb-3">
                     <label for="email" class="form-label">이메일</label>
-                    <input type="email" class="form-control form-control-lg rounded-3" id="email"
-                           placeholder="이메일을 입력하세요.">
+                    <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                        <input type="email" class="form-control border-start-0" id="email"
+                               placeholder="이메일을 입력하세요.">
+                    </div>
                 </div>
-                <div class="mb-3">
+                <div class="mb-4">
                     <label for="password" class="form-label">암호</label>
-                    <input type="password" class="form-control form-control-lg rounded-3" id="password"
-                           placeholder="암호를 입력하세요.">
+                    <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                        <input type="password" class="form-control border-start-0" id="password"
+                               placeholder="암호를 입력하세요.">
+                    </div>
                 </div>
-                <div class="d-grid">
+                <div class="d-grid mb-4">
                     <button type="button" class="btn btn-primary btn-lg rounded-pill" id="btnLogin">로그인</button>
                 </div>
             </form>
-            <div class="text-center mt-4">
-                <p>첫 방문이신가요? <a href="/register" class="text-decoration-none">회원가입</a></p>
-                <a href="/" class="text-muted text-decoration-none">← 뒤로가기</a>
+            <div class="text-center">
+                <p>첫 방문이신가요? <a href="/register" class="text-decoration-none fw-bold">회원가입</a></p>
+                <a href="/" class="text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left"></i> 뒤로가기
+                </a>
             </div>
         </div>
     </div>
-
+    <script src="/assets/js/alert.js"></script>
     <script>
         window.onload = function () {
             document.querySelector("#btnLogin").onclick = login;
@@ -59,16 +77,15 @@
                 if (res.ok) {
                     // 로그인 성공 처리
                     sessionStorage.setItem('user', JSON.stringify(data));
-                    console.log("로그인 성공:", data);
-                    window.location.href = "/";
+                    showSuccessAlert("로그인에 성공했습니다.");
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 850);
                 } else {
-                    document.getElementById("error-message").textContent =
-                        data.message || "로그인에 실패했습니다.";
+                    showErrorAlert(data.message);
                 }
             } catch (e) {
-                document.getElementById("error-message").textContent =
-                    "서버와 통신 중 오류가 발생했습니다.";
-                console.error(e);
+                showErrorAlert(data.message);
             }
         }
     </script>

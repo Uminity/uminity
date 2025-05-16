@@ -115,7 +115,7 @@
                     showSuccessAlert('게시글이 성공적으로 삭제되었습니다.');
                     setTimeout(() => window.location.href = '/', 850);
                 } else {
-                    showErrorAlert('게시글 삭제에 실패했습니다.');
+                    showWarningAlert('본인 게시글만 삭제할 수 있습니다..');
                 }
             } catch (err) {
                 console.error('삭제 오류:', err);
@@ -207,6 +207,11 @@
             if (!content) return showWarningAlert('댓글을 입력하세요.');
 
             const userId = userJson ? JSON.parse(userJson).userId : null;
+            if (userId == null) {
+                showWarningAlert('로그인 후 이용 가능합니다.');
+                return;
+            }
+
             try {
                 const res = await util.fetchWithCsrf(`/api/posts/${postId}/comments`, {
                     method: 'POST',
@@ -224,6 +229,7 @@
                 showErrorAlert('서버 오류가 발생했습니다.');
             }
         }
+
 
         // 3. 댓글 수정 활성화
         async function enableEdit(commentId) {
@@ -287,7 +293,7 @@
                     showSuccessAlert('댓글이 삭제되었습니다.');
                     listComments();
                 } else {
-                    showErrorAlert('댓글 삭제에 실패했습니다.');
+                    showWarningAlert('본인 댓글만 삭제할 수 있습니다..');
                 }
             } catch (err) {
                 console.error('댓글 삭제 오류:', err);

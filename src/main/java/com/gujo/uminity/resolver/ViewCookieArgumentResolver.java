@@ -10,12 +10,16 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ViewCookieArgumentResolver implements HandlerMethodArgumentResolver {
 
     private static final String COOKIE_NAME = "VIEWED_POSTS";
-    private static final int MAX_AGE = 3 * 60; // 3분
+    private static final int MAX_AGE_SECONDS = 1 * 60; // 3분
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -28,33 +32,42 @@ public class ViewCookieArgumentResolver implements HandlerMethodArgumentResolver
                                   ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+        HttpServletRequest req = webRequest.getNativeRequest(HttpServletRequest.class);
+        HttpServletResponse resp = webRequest.getNativeResponse(HttpServletResponse.class);
 
         @SuppressWarnings("unchecked")
         Map<String, String> uriVars = (Map<String, String>)
-                request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        String postIdStr = uriVars.get("postId");
+                req.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        String annotatedName = parameter.getParameterAnnotation(ViewCookie.class).postIdParam();
+        String postId = uriVars != null ? uriVars.get(annotatedName) : null;
 
-        // 쿠키값 읽어서
-        String tmpCookie = "";
-        Cookie[] cookies = request.getCookies();
+        if (postId == null || !postId.matches("\\d+")) {
+            return false;
+        }
+
+        String decoded = "";
+        Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
-                if (COOKIE_NAME.equals(c.getName())) {
-                    tmpCookie = c.getValue();
+                if (COOKIE_NAME.equals(c.getName()) && c.getValue() != null) {
+                    decoded = URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
                     break;
                 }
             }
         }
-        boolean isNew = !tmpCookie.contains(postIdStr);
 
+        boolean isNew = Arrays.stream(decoded.split(","))
+                .noneMatch(postId::equals);
+
+        // 4) 새로운 ID면 쿠키에 추가 (인코딩)
         if (isNew) {
-            String newVal = tmpCookie.isEmpty() ? postIdStr : tmpCookie + "," + postIdStr;
-            Cookie newCookie = new Cookie(COOKIE_NAME, newVal);
+            String updated = decoded.isEmpty() ? postId : (decoded + "," + postId);
+            String encoded = URLEncoder.encode(updated, StandardCharsets.UTF_8);
+
+            Cookie newCookie = new Cookie(COOKIE_NAME, encoded);
             newCookie.setPath("/");
-            newCookie.setMaxAge(MAX_AGE);
-            response.addCookie(newCookie);
+            newCookie.setMaxAge(MAX_AGE_SECONDS);
+            resp.addCookie(newCookie);
         }
 
         return isNew;

@@ -39,7 +39,6 @@ public class PostController {
     public ResponseEntity<PostResponseDto> getPost(
             @PathVariable("postId") Long postId,
             @ViewCookie boolean isNew) {
-
         postService.incrementViewCountIfNew(postId, isNew);
         PostResponseDto dto = postService.getPost(postId);
         return ResponseEntity.ok(dto);

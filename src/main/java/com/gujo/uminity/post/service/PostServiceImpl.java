@@ -124,11 +124,18 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void incrementViewCountIfNew(Long postId, boolean isNew) {
-        if (isNew) {
+        if (!isNew) return; // 이미 본 게시글이면 패스
+
+        try {
             int updated = postRepository.incrementViewCount(postId);
+            // 조회수 증가 실패해도 조회는 가능해야 하므로 여기서 예외 X
             if (updated == 0) {
-                throw new IllegalArgumentException("존재하지 않는 게시글: " + postId);
+                System.out.println("[INFO] 조회수 증가 실패: 존재하지 않는 게시글 postId=" + postId);
+                // 증가 실패는 로깅만 하고 넘긴다
             }
+        } catch (Exception e) {
+            // 증가 중 문제가 생겨도 조회는 가능해야 함
+            System.out.println("[ERROR] 조회수 증가 중 예외 발생: " + e.getMessage());
         }
     }
 }

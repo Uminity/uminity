@@ -1,20 +1,16 @@
 package com.gujo.uminity.config;
 
-import com.gujo.uminity.config.interceptor.ViewCountInterceptor;
-import lombok.RequiredArgsConstructor;
+import com.gujo.uminity.resolver.ViewCookieArgumentResolver;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
-@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-
-    private final ViewCountInterceptor viewCountInterceptor;
-
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(viewCountInterceptor)
-                .addPathPatterns("/api/posts/*");  // /api/posts/{postId}
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(new ViewCookieArgumentResolver());
     }
 }

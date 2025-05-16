@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "like_id")
-    private Long likeId;
+    @Column(name = "likes_id", nullable = false, updatable = false)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

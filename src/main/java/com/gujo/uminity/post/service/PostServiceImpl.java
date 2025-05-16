@@ -14,10 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.time.LocalDateTime.now;
 
 @Service
 @RequiredArgsConstructor
@@ -89,14 +89,7 @@ public class PostServiceImpl implements PostService {
 //        post.setCreatedAt(LocalDateTime.now());
 //        post.setViewCnt(0);
 
-        Post post = Post.builder()
-                .user(user)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .createdAt(now())
-                .viewCnt(0)
-                .build();
-
+        Post post = Post.of(user, request.getTitle(), request.getContent());
         Post saved = postRepository.save(post);
         return PostResponseDto.fromEntity(saved);
     }
@@ -112,8 +105,8 @@ public class PostServiceImpl implements PostService {
             throw new IllegalArgumentException("본인만 수정할 수 있습니다.");
         }
 
-        post.setTitle(request.getTitle());
-        post.setContent(request.getContent());
+        post.updateTitle(request.getTitle());
+        post.updateContent(request.getContent());
 
         return PostResponseDto.fromEntity(post);
     }
@@ -124,30 +117,36 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
 
-        if (!post.getUser().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isManager = false;
+        if (auth != null) {
+            isManager = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
         }
 
+        if (!post.getUser().getUserId().equals(userId) && !isManager) {
+            throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
+        }
         postRepository.delete(post);
     }
 
     @Override
     @Transactional
-    public void incrementViewCount(Long postId) {
-//        Post post = postRepository.findById(postId)
-//                .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
-//        // 엔티티 성공적으로 로드하면 +1해주자
-//        post.setViewCnt(post.getViewCnt() + 1);
-//        무조건 postId가 있다고 생각해서 쿼리문을 업데이트만 사용하게끔
-        postRepository.incrementViewCount(postId);
+    public void incrementViewCountIfNew(Long postId, boolean isNew) {
+        if (!isNew) {
+            return; // 이미 본 게시글이면 패스
+        }
+
+        try {
+            int updated = postRepository.incrementViewCount(postId);
+            // 조회수 증가 실패해도 조회는 가능해야 하므로 여기서 예외 X
+            if (updated == 0) {
+                System.out.println("[INFO] 조회수 증가 실패: 존재하지 않는 게시글 postId=" + postId);
+                // 증가 실패는 로깅만 하고 넘긴다
+            }
+        } catch (Exception e) {
+            // 증가 중 문제가 생겨도 조회는 가능해야 함
+            System.out.println("[ERROR] 조회수 증가 중 예외 발생: " + e.getMessage());
+        }
     }
 }
-
-/*
-CRUD 만들고 났고 조회랑 수정은 있는지 여부를 확인해야되고 없으면 예외 던지기
-그리고 응답객체에 post 빌더패턴으로 생성해서 넣어주기
-
-JPA 작업을 하나의 트랜잭션으로 묶고 자동으로 롤백해서
-
-연관관계로 UserRepository 추가해서 반영
- */

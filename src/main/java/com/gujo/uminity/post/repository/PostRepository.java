@@ -36,10 +36,3 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // findById로 SELECT 한다음 post.setViewCnt 로 업데이트할 때 또 update 쿼리를 가져오니까
     // postId는 무조건 있다고 생각해서 그냥 조회없이 바로 업데이트하게끔?
 }
-
-/*
- 생각 정리
- DB랑 접근하고 있는 레포지토리는 원하는 것만 빠르게 꺼낼 수 있다.
- 클라이언트로 데이터 보내고 브라우저에서 필터링하기엔 네트워크 비용이 클 것이다.
-
- */

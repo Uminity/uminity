@@ -47,11 +47,9 @@ public class MyPageServiceImpl implements MyPageService {
     @Transactional
     public void updateUserInfo(UpdateUserInfoRequestDto updateUserInfoRequestDto) {
 
-        // 1) 현재 로그인된 사용자 ID 꺼내기 (Spring Security)
         String email = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
 
-        // 2) 엔티티 조회
         User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
 

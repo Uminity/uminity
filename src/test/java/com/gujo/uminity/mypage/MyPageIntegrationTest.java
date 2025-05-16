@@ -70,21 +70,13 @@ public class MyPageIntegrationTest {
         userRepository.save(user);
         userId = user.getUserId();
         // 테스트용 게시글 생성
-        Post post = Post.builder()
-                .title("제목")
-                .content("내용")
-                .viewCnt(5)
-                .user(user)
-                .build();
-        postRepository.save(post);
-
-        // 테스트용 댓글 생성
-        Comment comment = Comment.builder()
-                .post(post)
-                .user(user)
-                .content("댓글")
-                .build();
-        commentRepository.save(comment);
+        Post post = postRepository.save(
+                Post.of(user, "제목", "내용")
+        );
+        // 3) 댓글 생성 (팩토리 메서드 of 이용)
+        Comment comment = commentRepository.save(
+                Comment.of(post, user, "댓글", null)
+        );
 
         // 로그인 후 세션 저장
         MvcResult result = mockMvc.perform(formLogin()

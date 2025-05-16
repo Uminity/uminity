@@ -24,11 +24,10 @@ public interface PostService {
     서비스 계층에서 userId를 받아와야한다.
     */
 
-    void incrementViewCount(Long postId);
+    // 기존: void incrementViewCountIfNew(Long postId);
+    void incrementViewCountIfNew(Long postId, boolean isNew);
     /* 조회수는 누가봤는지 검증안해도되고 postId만 검증
     stateless 한 쿠키로 중복 카운팅 방지 - 세션 방식과 쿠키 방식중
-
-    역할 분리해서 HTTP 쿠키 처리는 컨트롤러가 담당하고 서비스는 조회수 증가 로직만 수행하자!!
      */
 }
 

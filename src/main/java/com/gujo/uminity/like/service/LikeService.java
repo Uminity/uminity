@@ -1,6 +1,7 @@
 package com.gujo.uminity.like.service;
 
 import com.gujo.uminity.common.web.PageResponse;
+import com.gujo.uminity.like.dto.response.CheckLikeResponse;
 import com.gujo.uminity.like.dto.response.ToggleLikeResponse;
 import com.gujo.uminity.post.dto.response.PostResponseDto;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ public interface LikeService {
     PageResponse<String> getLikerNamesByPostId(Long postId, Pageable pageable);
 
     PageResponse<PostResponseDto> getMyLikedPosts(String userId, Pageable pageable);
+
+    CheckLikeResponse checkLike(String userId, Long postId);
 }
 
 // 좋아요 결과 응답 DOT 반환

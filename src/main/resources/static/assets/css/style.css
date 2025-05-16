@@ -131,10 +131,10 @@ a:hover {
     overflow: hidden;
 }
 
-.card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
+/*.card:hover {*/
+/*    box-shadow: var(--shadow-lg);*/
+/*    transform: translateY(-2px);*/
+/*}*/
 
 .card-title {
     font-weight: 700;

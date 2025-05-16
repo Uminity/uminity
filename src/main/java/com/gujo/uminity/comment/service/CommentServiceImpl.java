@@ -1,7 +1,5 @@
 package com.gujo.uminity.comment.service;
 
-import static java.time.LocalDateTime.now;
-
 import com.gujo.uminity.comment.dto.request.CommentCreateRequest;
 import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
@@ -9,22 +7,25 @@ import com.gujo.uminity.comment.dto.response.ChildCommentDto;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.entity.Comment;
 import com.gujo.uminity.comment.repository.CommentRepository;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
 import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
-import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -101,13 +102,7 @@ public class CommentServiceImpl implements CommentService {
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부모 댓글: " + req.getParentId()));
         }
 
-        Comment comment = Comment.builder()
-                .post(post)
-                .user(user)
-                .parent(parent)
-                .content(req.getContent())
-                .createdAt(now())
-                .build();
+        Comment comment = Comment.of(post, user, req.getContent(), parent);
         Comment saved = commentRepository.save(comment);
 
         return mapToCommentDto(saved);
@@ -149,7 +144,16 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalArgumentException("해당 게시글에 존재하지 않는 댓글입니다.");
         }
 
-        if (!comment.getUser().getUserId().equals(userId)) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // auth가 null이면 isManager를 false로 초기화
+        boolean isManager = false;
+        if (auth != null) {
+            isManager = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+        }
+
+        // 작성자도 아니고 매니저 권한도 없으면 예외
+        if (!comment.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }
 
@@ -180,9 +184,3 @@ public class CommentServiceImpl implements CommentService {
         return CommentResponseDto.fromEntity(parent, childDtos, totalChildCount);
     }
 }
-    /*
-    1.	엔티티 조회(존재 여부)
-	2.	권한 검사(애플리케이션 로직)
-	3.	도메인 메서드 호출 (updateContent)
-	4.	DTO 매핑 및 응답
-     */

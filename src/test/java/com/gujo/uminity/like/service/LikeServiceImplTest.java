@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -31,6 +32,7 @@ class LikeServiceImplTest {
 
     @InjectMocks
     private LikeServiceImpl likeService;
+
     private User user;
     private Post post;
     private final String userId = "user1";
@@ -38,20 +40,32 @@ class LikeServiceImplTest {
 
     @BeforeEach
     void 설정() {
-        user = new User();
-        user.setUserId(userId);
-        post = new Post();
-        post.setPostId(postId);
+        // User 준비
+        user = User.builder()
+                .userId(userId)
+                .name("tester")
+                .email("test@test.com")
+                .password("pwd")
+                .phone("010-1111-1111")
+                .build();
+
+        post = Post.of(user, "테스트 제목", "테스트 내용");
+        // postId 매핑 (JPA 없이 직접 할당)
+        ReflectionTestUtils.setField(post, "postId", postId);
     }
 
     @Test
     @DisplayName("게시글 미존재 시 IllegalArgumentException 발생")
     void 게시글이없는데좋아요는못누르지() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(user));
+        when(postRepository.findById(postId))
+                .thenReturn(Optional.empty());
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> likeService.toggleLike(userId, postId));
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> likeService.toggleLike(userId, postId)
+        );
         assertEquals("존재하지 않는 게시글: " + postId, ex.getMessage());
 
         verify(userRepository).findById(userId);
@@ -60,27 +74,32 @@ class LikeServiceImplTest {
     }
 
     @Test
-    @DisplayName("이미 좋아요 상태면 flag 동작해서 likedByMe=false 반환")
+    @DisplayName("이미 좋아요 상태면 flag=false, 좋아요 수 감소")
     void 좋아요취소() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(likeRepository.existsByUserUserIdAndPostPostId(userId, postId)).thenReturn(true);
-        when(likeRepository.countByPostPostId(postId)).thenReturn(5L);
+        when(likeRepository.existsByUserUserIdAndPostPostId(userId, postId))
+                .thenReturn(true);
+        when(likeRepository.countByPostPostId(postId))
+                .thenReturn(4L);
+
         ToggleLikeResponse response = likeService.toggleLike(userId, postId);
 
         assertFalse(response.isLikedByMe());
-        assertEquals(5L, response.getLikeCount());
+        assertEquals(4L, response.getLikeCount());
         verify(likeRepository).deleteByUserUserIdAndPostPostId(userId, postId);
         verify(likeRepository).countByPostPostId(postId);
     }
 
     @Test
-    @DisplayName("좋아요 상태가 아니면 flag 동작해서 likedByMe=true 반환")
+    @DisplayName("좋아요 상태가 아니면 flag=true, 좋아요 수 증가")
     void 좋아요() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(likeRepository.existsByUserUserIdAndPostPostId(userId, postId)).thenReturn(false);
-        when(likeRepository.countByPostPostId(postId)).thenReturn(1L);
+        when(likeRepository.existsByUserUserIdAndPostPostId(userId, postId))
+                .thenReturn(false);
+        when(likeRepository.countByPostPostId(postId))
+                .thenReturn(1L);
 
         ToggleLikeResponse response = likeService.toggleLike(userId, postId);
 

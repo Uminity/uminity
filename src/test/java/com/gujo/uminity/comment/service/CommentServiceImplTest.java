@@ -19,13 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,7 +52,8 @@ class CommentServiceImplTest {
     private Comment parent;
 
     @BeforeEach
-    void 설정() {
+    void setUp() {
+        // Users
         user1 = User.builder()
                 .userId("id1")
                 .name("User1")
@@ -70,22 +70,13 @@ class CommentServiceImplTest {
                 .phone("010-1111-1112")
                 .build();
 
-        post = Post.builder()
-                .postId(1L)
-                .user(user1)
-                .title("Title")
-                .content("content")
-                .createdAt(now())
-                .viewCnt(0)
-                .build();
+        // Post using factory
+        post = Post.of(user1, "Title", "content");
+        ReflectionTestUtils.setField(post, "postId", 1L);
 
-        parent = Comment.builder()
-                .commentId(10L)
-                .post(post)
-                .user(user1)
-                .content("댓글")
-                .createdAt(now())
-                .build();
+        // Parent comment using factory
+        parent = Comment.of(post, user1, "댓글", null);
+        ReflectionTestUtils.setField(parent, "commentId", 10L);
     }
 
     @Test
@@ -104,7 +95,7 @@ class CommentServiceImplTest {
     void 게시글있음() {
         given(postRepository.findById(1L)).willReturn(Optional.of(post));
         given(commentRepository.findByPost_PostIdAndParentIsNull(eq(1L), any(Pageable.class)))
-                .willReturn(new PageImpl<>(List.of(parent), PageRequest.of(0, 5), 1));
+                .willReturn(new PageImpl<>(List.of(parent)));
         given(commentRepository.findTop3ByParent_CommentIdOrderByCreatedAtDesc(10L))
                 .willReturn(List.of());
         given(commentRepository.countByParent_CommentId(10L)).willReturn(0L);
@@ -128,13 +119,8 @@ class CommentServiceImplTest {
         given(userRepository.findById("id1")).willReturn(Optional.of(user1));
         given(postRepository.findById(1L)).willReturn(Optional.of(post));
 
-        Comment saved = Comment.builder()
-                .commentId(200L)
-                .post(post)
-                .user(user1)
-                .content("test")
-                .createdAt(now())
-                .build();
+        Comment saved = Comment.of(post, user1, "test", null);
+        ReflectionTestUtils.setField(saved, "commentId", 200L);
         given(commentRepository.save(any(Comment.class))).willReturn(saved);
 
         CommentResponseDto dto = commentService.createComment(1L, req, "id1");
@@ -150,7 +136,7 @@ class CommentServiceImplTest {
         given(commentRepository.findById(10L)).willReturn(Optional.of(parent));
 
         CommentUpdateRequest req = new CommentUpdateRequest();
-        req.setContent("update");  // 테스트 기대값과 일치하도록
+        req.setContent("update");
 
         CommentResponseDto dto = commentService.updateComment(1L, 10L, req, "id1");
 
@@ -188,7 +174,6 @@ class CommentServiceImplTest {
     @Test
     @DisplayName("비작성자 삭제 실패")
     void 작성자가아니면실패() {
-
         given(postRepository.findById(1L)).willReturn(Optional.of(post));
         given(commentRepository.findById(10L)).willReturn(Optional.of(parent));
 

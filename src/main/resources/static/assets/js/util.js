@@ -1,3 +1,74 @@
+// CSRF 전용 util.js
+
+let CSRF_TOKEN = '';
+let CSRF_HEADER = '';
+
+/**
+ * 1) 서버에서 토큰 + 헤더 이름(headerName)을 가져와 전역 변수에 저장.
+ */
+async function fetchCsrfToken() {
+    try {
+        const res = await fetch('/csrf-token', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+        if (!res.ok) throw new Error('CSRF 토큰 조회 실패');
+        const data = await res.json();
+        CSRF_TOKEN = data.token;
+        CSRF_HEADER = data.headerName;  // ex) "X-XSRF-TOKEN"
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+/**
+ * 2) 모든 POST/PUT/DELETE 폼 제출 시
+ *    숨은 input[name=_csrf] 을 자동 추가하고 값을 세팅.
+ */
+function setupCsrfForForms() {
+    document.addEventListener('submit', e => {
+        const form = e.target;
+        const method = (form.getAttribute('method') || 'GET').toUpperCase();
+        if (method !== 'GET') {
+            let hid = form.querySelector('input[name="_csrf"]');
+            if (!hid) {
+                hid = document.createElement('input');
+                hid.type = 'hidden';
+                hid.name = '_csrf';
+                form.appendChild(hid);
+            }
+            hid.value = CSRF_TOKEN;
+        }
+    });
+}
+
+/**
+ * 3) fetch 래퍼: 모든 AJAX 요청에 CSRF 헤더를 자동 포함.
+ */
+async function fetchWithCsrf(url, options = {}) {
+    options.credentials = 'same-origin';
+    options.headers = {
+        ...(options.headers || {}),
+        [CSRF_HEADER]: CSRF_TOKEN
+    };
+    return fetch(url, options);
+}
+
+/**
+ * 4) 초기화: 페이지 로드 시 실행
+ */
+async function initUtil() {
+    await fetchCsrfToken();
+    setupCsrfForForms();
+}
+
+window.addEventListener('load', initUtil);
+
+// 전역 네임스페이스에 노출
+window.util = {
+    fetchWithCsrf
+};
+
 // UI 초기화: 세션스토리지 user 확인 후 nav toggle
 function loadNavbar() {
     fetch('/assets/nav.html')
@@ -48,13 +119,16 @@ async function initUI() {
 
 function showLoginOnly() {
     document.getElementById("navLogin").style.display = "";
+    document.getElementById("navRegister").style.display = "";
     document.getElementById("navUser").style.display = "none";
     document.getElementById("navMyPage").style.display = "none";
     document.getElementById("navLogout").style.display = "none";
+
 }
 
 function showLoggedIn() {
     document.getElementById("navLogin").style.display = "none";
+    document.getElementById("navRegister").style.display = "none";
     document.getElementById("navUser").style.display = "";
     document.getElementById("navMyPage").style.display = "";
     document.getElementById("navLogout").style.display = "";
@@ -62,25 +136,14 @@ function showLoggedIn() {
 
 async function logout(e) {
     e.preventDefault();
-
-    // 1) 서버에 로그아웃 요청 (세션 쿠키 포함)
+    // util.fetchWithCsrf를 사용해 POST /logout 요청
     try {
-        const res = await fetch("/logout", {
-            method: "GET",              // 또는 POST로 설정한 경우 POST
-            credentials: "include"      // ← 매우 중요: 세션 쿠키(JSESSIONID)를 서버에 전달
-        });
-        // 로그아웃 리스폰스를 JSON으로 파싱하지 않습니다.
-        if (!res.ok) {
-            console.warn("서버 로그아웃 실패:", res.status);
-        }
+        const res = await util.fetchWithCsrf('/logout', {method: 'POST'});
+        if (!res.ok) console.warn('로그아웃 실패:', res.status);
     } catch (err) {
-        console.error("서버 로그아웃 에러:", err);
+        console.error('로그아웃 에러:', err);
     }
-
-    // 2) 클라이언트 세션정보 지우기
-    sessionStorage.removeItem("user");
-
-    // 3) UI 초기화 (Login 버튼만 보이도록)
+    sessionStorage.removeItem('user');
     initUI();
 }
 
@@ -112,7 +175,7 @@ function makePaginationHTML(listRowCount, pageLinkCount, currentPageIndex, total
     }
 
     let next;
-    if (endPageIndex > pageLinkCount) {
+    if (endPageIndex > pageCount) {
         endPageIndex = pageCount
         next = false;
     } else {

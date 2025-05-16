@@ -8,6 +8,7 @@ import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
 import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.like.service.LikeService;
 import com.gujo.uminity.mypage.dto.MyPageResponseDto;
+import com.gujo.uminity.mypage.dto.PasswordChangeRequestDto;
 import com.gujo.uminity.mypage.dto.UpdateUserInfoRequestDto;
 import com.gujo.uminity.mypage.service.MyPageService;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -77,8 +78,14 @@ public class MyPageController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@AuthenticationPrincipal MyUserDetails myUserDetails) {
-        String userId = myUserDetails.getUserId();
-        System.out.println(userId);
         myPageService.deleteUser(myUserDetails.getUserId());
+    }
+
+    @PatchMapping("/password")
+    @ResponseStatus(HttpStatus.OK)
+    public void changePassword(@RequestBody PasswordChangeRequestDto passwordChangeRequestDto,
+                               @AuthenticationPrincipal MyUserDetails myUserDetails) {
+        String userId = myUserDetails.getUserId();
+        myPageService.changePassword(userId, passwordChangeRequestDto);
     }
 }

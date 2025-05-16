@@ -1,7 +1,5 @@
 package com.gujo.uminity.post.service;
 
-import static java.time.LocalDateTime.now;
-
 import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -120,8 +118,11 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재 하지 않는 게시글: " + postId));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+        boolean isManager = false;
+        if (auth != null) {
+            isManager = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+        }
 
         if (!post.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
@@ -132,7 +133,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void incrementViewCountIfNew(Long postId, boolean isNew) {
-        if (!isNew) return; // 이미 본 게시글이면 패스
+        if (!isNew) {
+            return; // 이미 본 게시글이면 패스
+        }
 
         try {
             int updated = postRepository.incrementViewCount(postId);
@@ -147,13 +150,3 @@ public class PostServiceImpl implements PostService {
         }
     }
 }
-
-/*
-CRUD 만들고 났고 조회랑 수정은 있는지 여부를 확인해야되고 없으면 예외 던지기
-그리고 응답객체에 post 빌더패턴으로 생성해서 넣어주기
-
-JPA 작업을 하나의 트랜잭션으로 묶고 자동으로 롤백해서
-
-연관관계로 UserRepository 추가해서 반영
-도메인 메서드 하나만 노출하면 그 메서드로 수정한다.
- */

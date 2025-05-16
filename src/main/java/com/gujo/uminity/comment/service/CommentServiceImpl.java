@@ -145,9 +145,14 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isManager = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+        // auth가 null이면 isManager를 false로 초기화
+        boolean isManager = false;
+        if (auth != null) {
+            isManager = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
+        }
 
+        // 작성자도 아니고 매니저 권한도 없으면 예외
         if (!comment.getUser().getUserId().equals(userId) && !isManager) {
             throw new IllegalArgumentException("본인만 삭제할 수 있습니다.");
         }
@@ -179,9 +184,3 @@ public class CommentServiceImpl implements CommentService {
         return CommentResponseDto.fromEntity(parent, childDtos, totalChildCount);
     }
 }
-    /*
-    1.	엔티티 조회(존재 여부)
-	2.	권한 검사(애플리케이션 로직)
-	3.	도메인 메서드 호출 (updateContent)
-	4.	DTO 매핑 및 응답
-     */

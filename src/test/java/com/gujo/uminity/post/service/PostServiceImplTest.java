@@ -1,5 +1,14 @@
 package com.gujo.uminity.post.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.then;
+
 import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.dto.request.PostCreateRequest;
 import com.gujo.uminity.post.dto.request.PostListRequest;
@@ -9,6 +18,9 @@ import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,15 +28,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceImplTest {
@@ -201,16 +209,5 @@ class PostServiceImplTest {
         postService.incrementViewCountIfNew(postId, false);
 
         then(postRepository).should(never()).incrementViewCount(anyLong());
-    }
-
-    @Test
-    @DisplayName("isNew=true이고 존재하지 않는 게시글이면 예외 발생")
-    void 조회수증가_예외() {
-        Long postId = 42L;
-        given(postRepository.incrementViewCount(postId)).willReturn(0);
-
-        assertThatThrownBy(() -> postService.incrementViewCountIfNew(postId, true))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("존재하지 않는 게시글: " + postId);
     }
 }

@@ -145,6 +145,7 @@ async function logout(e) {
     }
     sessionStorage.removeItem('user');
     initUI();
+    window.location.href = "/";
 }
 
 // 페이지네이션

@@ -200,10 +200,7 @@
             // 1) CSRF 초기화
             await initUtil();
 
-            // 2) 네비 로드
-            const navHtml = await fetch('/assets/nav.html').then(r => r.text());
-            document.getElementById('nav-placeholder').innerHTML = navHtml;
-            initUI();
+            loadNavbar();
 
             // 3) 내 정보 및 초기 콘텐츠 로드
             await loadMyInfo();

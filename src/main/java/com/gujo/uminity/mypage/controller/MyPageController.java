@@ -66,6 +66,7 @@ public class MyPageController {
         String userId = principal.getUserId();
         PageResponse<PostResponseDto> response = likeService.getMyLikedPosts(userId, pageable);
         return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/comments")
     public ResponseEntity<PageResponse<MyCommentResponseDto>> listMyComments(@Validated @ModelAttribute MyCommentRequestDto myCommentRequestDto) {

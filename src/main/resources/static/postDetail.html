@@ -25,12 +25,13 @@
             <!-- 내용은 JavaScript로 채워집니다 -->
         </div>
 
-        <!-- 댓글 목록 -->
+        <!-- 댓글 -->
         <div class="mb-4">
             <h5 class="d-flex align-items-center mb-3">
                 <i class="bi bi-chat-dots me-2"></i> 댓글 <span id="commentCount" class="ms-2 badge bg-primary rounded-pill"></span>
             </h5>
             <div class="card shadow-sm mb-3">
+            	<!-- 댓글 입력 -->
                 <div class="card-body">
                     <textarea class="form-control p-3 mb-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3" style="resize: none;"></textarea>
                     <div class="d-flex justify-content-end">
@@ -40,6 +41,7 @@
                     </div>
                 </div>
             </div>
+            <!-- 댓글 목록 -->
             <div class="mb-3" id="commentDiv"></div>
         </div>
     </div>
@@ -67,7 +69,7 @@
 
         let postId = window.location.pathname.split("/").pop();
         let PAGE = 0;
-        let SIZE = 100;
+        let SIZE = 10;
 
         async function postDetail() {
             let response = await fetch("/api/posts/" + postId);
@@ -118,40 +120,112 @@
             `;
         }
 
-        // 게시글 불러오기
-        async function listComments() {
-            let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
-            let response = await fetch(url);
-            if (response.ok) {
-                let data = await response.json();
-                PAGE = data.page, SIZE = data.size;
-                total_elements = data.totalElements, total_pages = data.totalPages;
-                let comments = data.content;
-                document.querySelector("#commentCount").innerText = `(${total_elements})`;
-                let commentDiv = document.querySelector("#commentDiv");
-                commentDiv.innerHTML = ``;
+		// 댓글 불러오기
+		async function listComments() {
+		    let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
+		    let response = await fetch(url);
+		    if (response.ok) {
+		        let data = await response.json();
+		        PAGE = data.page, SIZE = data.size;
+		        total_elements = data.totalElements, total_pages = data.totalPages;
+		        let comments = data.content;
+		        
+		        // 댓글 개수 (대댓글 포함)
+		        let totalWithReplies = comments.reduce((total, comment) => {
+		            return total + 1 + (comment.children ? comment.children.length : 0);
+		        }, 0);
+		        document.querySelector("#commentCount").innerText = `(${totalWithReplies})`;
+		        
+		        let commentDiv = document.querySelector("#commentDiv");
+		        commentDiv.innerHTML = "";  // 초기화
+		        
+		        // 댓글 렌더링
+		        comments.forEach(comment => {
+		            // 댓글 본문 추가 (최신순)
+		            let commentHtml = generateCommentHtml(comment);
+		            commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
+		            
+		            // 대댓글이 있는 경우 최신순으로 추가
+		            if (comment.children && comment.children.length > 0) {
+		                // 대댓글도 최신순으로
+		                comment.children.reverse().forEach(reply => {
+		                    let replyHtml = generateReplyHtml(reply);
+		                    document.querySelector(`#comment-${comment.commentId}`).insertAdjacentHTML("afterend", replyHtml);
+		                });
+		            }
+		        });
+		    } else {
+		        console.error("HTTP Error:", response.status);
+		    }
+		}
 
-                comments.forEach(comment => {
-                    let commentData = formatDate(comment.createdAt);
-                    let commentHtml = `
-	    				<div class="comment-item mb-3 rounded border p-3" id="comment-${comment.commentId}">
-		                    <p><strong>${comment.userName}</strong> <small>${commentData}</small></p>
-		                    <div class="comment-content" id="content-${comment.commentId}">
-		                        <p>${comment.content}</p>
-		                    </div>
-		                    <div class="d-flex justify-content-end">
-		                        <button class="btn btn-outline-primary btn-sm me-2" onclick="enableEdit(${comment.commentId})" id="editBtn-${comment.commentId}">수정</button>
-		                        <button class="btn btn-outline-danger btn-sm" onclick="deleteComment(${comment.commentId})" id="deleteBtn-${comment.commentId}">삭제</button>
-		                    </div>
-	                	</div>
-		    			`;
-                    commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
 
-                });
-            } else {
-                console.error("HTTP Error:", response.status);
-            }
-        }
+		
+		// 댓글 HTML 생성 함수
+		function generateCommentHtml(comment) {
+		    return `
+		        <div class="comment-item mb-3 rounded border p-3" id="comment-${comment.commentId}">
+		            <div class="d-flex justify-content-between align-items-center mb-2">
+		                <div>
+		                    <strong><i class="bi bi-person-circle me-1"></i> ${comment.userName}</strong>
+		                    <small class="text-muted ms-2"><i class="bi bi-clock me-1"></i>${formatDate(comment.createdAt)}</small>
+		                </div>
+		            </div>
+		            <div class="comment-content mb-2" id="content-${comment.commentId}">
+		                <p class="mb-0">${comment.content}</p>
+		            </div>
+		            <div class="row">
+		                <div class="col d-flex align-items-center">
+		                    <a href="#" onclick="toggleReplyForm(${comment.commentId}); return false;">답글쓰기</a>
+		                </div>
+		                <div class="col d-flex justify-content-end">
+		                    <button class="btn btn-outline-primary btn-sm me-2" onclick="enableEdit(${comment.commentId})" id="editBtn-${comment.commentId}">
+		                        <i class="bi bi-pencil"></i> 수정
+		                    </button>
+		                    <button class="btn btn-outline-danger btn-sm" onclick="deleteComment(${comment.commentId})" id="deleteBtn-${comment.commentId}">
+		                        <i class="bi bi-trash"></i> 삭제
+		                    </button>
+		                </div>
+		            </div>
+		            <div class="reply-form mt-2" id="replyForm-${comment.commentId}" style="display: none;">
+		                <textarea class="form-control mb-2" id="replyCommentInput-${comment.commentId}" placeholder="답글을 입력하세요."></textarea>
+		                <div class="d-flex justify-content-end">
+		                    <button class="btn btn-success btn-sm me-2" onclick="createReplyComment(${comment.commentId})">등록</button>
+		                    <button class="btn btn-secondary btn-sm" onclick="toggleReplyForm(${comment.commentId})">취소</button>
+		                </div>
+		            </div>
+		        </div>
+		    `;
+		}
+		
+		// 대댓글 HTML 생성 함수
+		function generateReplyHtml(reply) {
+		    return `
+		        <div class="reply-item mb-3 rounded border p-3 ms-4" id="reply-${reply.commentId}">
+		            <div class="d-flex justify-content-between align-items-center mb-2">
+		                <div>
+		                    <strong><i class="bi bi-person-circle me-1"></i> ${reply.userName}</strong>
+		                    <small class="text-muted ms-2"><i class="bi bi-clock me-1"></i>${formatDate(reply.createdAt)}</small>
+		                </div>
+		            </div>
+		            <div class="comment-content mb-2" id="content-${reply.commentId}">
+		            	<p class="mb-0"><i class="bi bi-arrow-return-right"> </i>${reply.content}</p>
+		            </div>
+		            <div class="row">
+		                <div class="col d-flex justify-content-end">
+		                    <button class="btn btn-outline-primary btn-sm me-2" onclick="enableEdit(${reply.commentId})" id="editBtn-${reply.commentId}">
+		                        <i class="bi bi-pencil"></i> 수정
+		                    </button>
+		                    <button class="btn btn-outline-danger btn-sm" onclick="deleteComment(${reply.commentId})" id="deleteBtn-${reply.commentId}">
+		                        <i class="bi bi-trash"></i> 삭제
+		                    </button>
+		                </div>
+		            </div>
+		        </div>
+		    `;
+}
+
+
 
         // 게시글 삭제
         async function deletePost(postId) {
@@ -202,7 +276,36 @@
                 let result = await response.json();
                 document.querySelector("#commentInput").value = "";
                 listComments();
-                console.log(result);
+            } else {
+                console.error("HTTP Error:", response.status);
+            }
+
+        }
+        
+     	// 대댓글 작성
+        async function createReplyComment(parentId) {
+            let content = document.querySelector(`#replyCommentInput-${parentId}`).value.trim();
+            let userId = JSON.parse(sessionStorage.getItem("user")).userId;
+
+            let commentData = {postId, parentId, content, userId}
+
+            if (!content) {
+                showWarningAlert("댓글을 입력하세요");
+                return;
+            }
+
+            let response = await fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(commentData),
+            });
+
+            if (response.ok) {
+                let result = await response.json();
+                document.querySelector("#commentInput").value = "";
+                listComments();
             } else {
                 console.error("HTTP Error:", response.status);
             }
@@ -225,7 +328,6 @@
 	                <button class="btn btn-secondary btn-sm" onclick="cancelEdit(${commentId}, '${originalContent}')">취소</button>
 	            </div>
 	        `;
-            document.querySelector(`edit-button-${commentId}`).style.display = 'none';
         }
 
         // 댓글 수정 진행
@@ -290,53 +392,17 @@
                 showErrorAlert("서버 오류가 발생했습니다.");
             }
         }
-
-        // 댓글 템플릿 수정
-        window.addEventListener('load', function () {
-            const originalListComments = listComments;
-
-            listComments = async function () {
-                let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
-                let response = await fetch(url);
-                if (response.ok) {
-                    let data = await response.json();
-                    PAGE = data.page, SIZE = data.size;
-                    total_elements = data.totalElements, total_pages = data.totalPages;
-                    let comments = data.content;
-                    document.querySelector("#commentCount").innerText = `${total_elements}`;
-                    let commentDiv = document.querySelector("#commentDiv");
-                    commentDiv.innerHTML = ``;
-
-                    comments.forEach(comment => {
-                        let commentData = formatDate(comment.createdAt);
-                        let commentHtml = `
-                        <div class="comment-item mb-3 rounded border p-3 shadow-sm" id="comment-${comment.commentId}">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <strong><i class="bi bi-person-circle me-1"></i> ${comment.userName}</strong>
-                                    <small class="text-muted ms-2"><i class="bi bi-clock me-1"></i>${commentData}</small>
-                                </div>
-                            </div>
-                            <div class="comment-content mb-2" id="content-${comment.commentId}">
-                                <p class="mb-0">${comment.content}</p>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button class="btn btn-sm btn-outline-primary me-2" onclick="enableEdit(${comment.commentId})" id="editBtn-${comment.commentId}">
-                                    <i class="bi bi-pencil"></i> 수정
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteComment(${comment.commentId})" id="deleteBtn-${comment.commentId}">
-                                    <i class="bi bi-trash"></i> 삭제
-                                </button>
-                            </div>
-                        </div>
-                        `;
-                        commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
-                    });
-                } else {
-                    console.error("HTTP Error:", response.status);
-                }
-            };
-        });
+        
+        // 대댓글 작성 활성화
+        function toggleReplyForm(commentId) {
+            let replyForm = document.getElementById(`replyForm-${commentId}`);
+            if (replyForm.style.display === 'none') {
+                replyForm.style.display = 'block';
+            } else {
+                replyForm.style.display = 'none';
+            }
+        }
+        
     </script>
 </body>
 </html>

@@ -1,7 +1,5 @@
 package com.gujo.uminity.comment.service;
 
-import static java.time.LocalDateTime.now;
-
 import com.gujo.uminity.comment.dto.request.CommentCreateRequest;
 import com.gujo.uminity.comment.dto.request.CommentListRequest;
 import com.gujo.uminity.comment.dto.request.CommentUpdateRequest;
@@ -9,15 +7,13 @@ import com.gujo.uminity.comment.dto.response.ChildCommentDto;
 import com.gujo.uminity.comment.dto.response.CommentResponseDto;
 import com.gujo.uminity.comment.entity.Comment;
 import com.gujo.uminity.comment.repository.CommentRepository;
+import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.mypage.dto.MyCommentRequestDto;
 import com.gujo.uminity.mypage.dto.MyCommentResponseDto;
-import com.gujo.uminity.common.web.PageResponse;
 import com.gujo.uminity.post.entity.Post;
 import com.gujo.uminity.post.repository.PostRepository;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -101,13 +100,7 @@ public class CommentServiceImpl implements CommentService {
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부모 댓글: " + req.getParentId()));
         }
 
-        Comment comment = Comment.builder()
-                .post(post)
-                .user(user)
-                .parent(parent)
-                .content(req.getContent())
-                .createdAt(now())
-                .build();
+        Comment comment = Comment.of(post, user, req.getContent(), parent);
         Comment saved = commentRepository.save(comment);
 
         return mapToCommentDto(saved);

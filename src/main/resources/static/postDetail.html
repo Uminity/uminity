@@ -31,7 +31,7 @@
                 <i class="bi bi-chat-dots me-2"></i> 댓글 <span id="commentCount" class="ms-2 badge bg-primary rounded-pill"></span>
             </h5>
             <div class="card shadow-sm mb-3">
-            	<!-- 댓글 입력 -->
+                <!-- 댓글 입력 -->
                 <div class="card-body">
                     <textarea class="form-control p-3 mb-3" id="commentInput" placeholder="댓글을 입력하세요." rows="3" style="resize: none;"></textarea>
                     <div class="d-flex justify-content-end">
@@ -58,19 +58,19 @@
     <script src="/assets/js/util.js"></script>
     <script src="/assets/js/alert.js"></script>
     <script>
-	    const postId = window.location.pathname.split('/').pop();
-	    let PAGE = 0, SIZE = 100;
-	
-	    window.onload = function () {
-	        initUtil();       // CSRF 토큰 초기화
-	        loadNavbar();     // 네비 로드
-	        postDetail();     // 게시글 데이터 로드
-	        listComments();   // 댓글 리스트 로드
-	        document.getElementById('commentSubmit')
-	            .addEventListener('click', createComment);
-	    };
+        const postId = window.location.pathname.split('/').pop();
+        let PAGE = 0, SIZE = 100;
 
-	    async function postDetail() {
+        window.onload = function () {
+            initUtil();       // CSRF 토큰 초기화
+            loadNavbar();     // 네비 로드
+            postDetail();     // 게시글 데이터 로드
+            listComments();   // 댓글 리스트 로드
+            document.getElementById('commentSubmit')
+                .addEventListener('click', createComment);
+        };
+
+        async function postDetail() {
             try {
                 const res = await fetch(`/api/posts/${postId}`);
                 if (!res.ok) throw res;
@@ -83,6 +83,7 @@
                         <p class="text-muted mb-2">
                             <i class="bi bi-person-circle me-1"></i> <strong>${post.authorName}</strong> |
                             <i class="bi bi-calendar3 ms-2 me-1"></i> <strong>${postDate}</strong>
+                            <i class="bi bi-eye-fill ms-2 me-1"></i> <strong>${post.viewCnt}</strong>
                         </p>
                         <div class="card-text mb-4 p-3 bg-light rounded">${post.content}</div>
                         <div class="d-flex justify-content-end">
@@ -121,54 +122,50 @@
                 showErrorAlert('서버 오류가 발생했습니다.');
             }
         }
-        
-        
-        
-     	// 댓글
-     	
-		// 댓글 불러오기
-		async function listComments() {
-		    let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
-		    let response = await fetch(url);
-		    if (response.ok) {
-		        let data = await response.json();
-		        PAGE = data.page, SIZE = data.size;
-		        total_elements = data.totalElements, total_pages = data.totalPages;
-		        let comments = data.content;
-		        
-		        // 댓글 개수 (대댓글 포함)
-		        let totalWithReplies = comments.reduce((total, comment) => {
-		            return total + 1 + (comment.children ? comment.children.length : 0);
-		        }, 0);
-		        document.querySelector("#commentCount").innerText = `(${totalWithReplies})`;
-		        
-		        let commentDiv = document.querySelector("#commentDiv");
-		        commentDiv.innerHTML = "";  // 초기화
-		        
-		        // 댓글 렌더링
-		        comments.forEach(comment => {
-		            // 댓글 본문 추가 (최신순)
-		            let commentHtml = generateCommentHtml(comment);
-		            commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
-		            
-		            // 대댓글이 있는 경우 최신순으로 추가
-		            if (comment.children && comment.children.length > 0) {
-		                // 대댓글도 최신순으로
-		                comment.children.reverse().forEach(reply => {
-		                    let replyHtml = generateReplyHtml(reply);
-		                    document.querySelector(`#comment-${comment.commentId}`).insertAdjacentHTML("afterend", replyHtml);
-		                });
-		            }
-		        });
-		    } else {
-		        console.error("HTTP Error:", response.status);
-		    }
-		}
-		
-		
-		// 1. 댓글 HTML 생성 함수
-		function generateCommentHtml(comment) {
-		    return `
+
+        // 댓글
+        // 댓글 불러오기
+        async function listComments() {
+            let url = `/api/posts/${postId}/comments?page=${PAGE}&size=${SIZE}`;
+            let response = await fetch(url);
+            if (response.ok) {
+                let data = await response.json();
+                PAGE = data.page, SIZE = data.size;
+                total_elements = data.totalElements, total_pages = data.totalPages;
+                let comments = data.content;
+
+                // 댓글 개수 (대댓글 포함)
+                let totalWithReplies = comments.reduce((total, comment) => {
+                    return total + 1 + (comment.children ? comment.children.length : 0);
+                }, 0);
+                document.querySelector("#commentCount").innerText = `(${totalWithReplies})`;
+
+                let commentDiv = document.querySelector("#commentDiv");
+                commentDiv.innerHTML = "";  // 초기화
+
+                // 댓글 렌더링
+                comments.forEach(comment => {
+                    // 댓글 본문 추가 (최신순)
+                    let commentHtml = generateCommentHtml(comment);
+                    commentDiv.insertAdjacentHTML("afterbegin", commentHtml);
+
+                    // 대댓글이 있는 경우 최신순으로 추가
+                    if (comment.children && comment.children.length > 0) {
+                        // 대댓글도 최신순으로
+                        comment.children.reverse().forEach(reply => {
+                            let replyHtml = generateReplyHtml(reply);
+                            document.querySelector(`#comment-${comment.commentId}`).insertAdjacentHTML("afterend", replyHtml);
+                        });
+                    }
+                });
+            } else {
+                console.error("HTTP Error:", response.status);
+            }
+        }
+
+        // 1. 댓글 HTML 생성 함수
+        function generateCommentHtml(comment) {
+            return `
 		        <div class="comment-item mb-3 rounded border p-3" id="comment-${comment.commentId}">
 		            <div class="d-flex justify-content-between align-items-center mb-2">
 		                <div>
@@ -201,9 +198,7 @@
 		            </div>
 		        </div>
 		    `;
-		}
-		
-        
+        }
 
         // 2. 댓글 작성
         async function createComment() {
@@ -229,8 +224,6 @@
                 showErrorAlert('서버 오류가 발생했습니다.');
             }
         }
-        
-     	
 
         // 3. 댓글 수정 활성화
         async function enableEdit(commentId) {
@@ -301,16 +294,11 @@
                 showErrorAlert('서버 오류가 발생했습니다.');
             }
         }
-        
-        
-        
-        
-        
+
         // 대댓글
-        
         // 1. 대댓글 HTML 생성 함수
-		function generateReplyHtml(reply) {
-		    return `
+        function generateReplyHtml(reply) {
+            return `
 		        <div class="reply-item mb-3 rounded border p-3 ms-4" id="reply-${reply.commentId}">
 		            <div class="d-flex justify-content-between align-items-center mb-2">
 		                <div>
@@ -333,9 +321,9 @@
 		            </div>
 		        </div>
 		    `;
-		}
-        
-     	// 2. 대댓글 작성 활성화 (토글)
+        }
+
+        // 2. 대댓글 작성 활성화 (토글)
         function toggleReplyForm(commentId) {
             let replyForm = document.getElementById(`replyForm-${commentId}`);
             if (replyForm.style.display === 'none') {
@@ -344,9 +332,9 @@
                 replyForm.style.display = 'none';
             }
         }
-        
-     	
-     	// 3. 대댓글 작성
+
+
+        // 3. 대댓글 작성
         async function createReplyComment(parentId) {
             const content = document.getElementById(`replyCommentInput-${parentId}`).value.trim();
             const userJson = sessionStorage.getItem('user');
@@ -370,9 +358,8 @@
                 showErrorAlert('서버 오류가 발생했습니다.');
             }
         }
-        
-        
-        
+
+
     </script>
 </body>
 </html>

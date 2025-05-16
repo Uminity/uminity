@@ -1,13 +1,17 @@
 package com.gujo.uminity.mypage.service;
 
 import com.gujo.uminity.mypage.dto.MyPageResponseDto;
+import com.gujo.uminity.mypage.dto.PasswordChangeRequestDto;
 import com.gujo.uminity.mypage.dto.UpdateUserInfoRequestDto;
 import com.gujo.uminity.user.entity.Role;
 import com.gujo.uminity.user.entity.User;
 import com.gujo.uminity.user.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageServiceImpl implements MyPageService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,5 +70,22 @@ public class MyPageServiceImpl implements MyPageService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자:" + userId));
 
         user.setDeleted(true);
+        user.setPhone(null);
+        user.setDeletedAt(LocalDateTime.now());
+    }
+
+    @Override
+    public void changePassword(String userId, PasswordChangeRequestDto passwordChangeRequestDto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new IllegalArgumentException("유저가 없습니다."));
+
+        if (!passwordEncoder.matches(passwordChangeRequestDto.getCurrentPassword(), user.getPassword())) {
+            throw new BadCredentialsException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordChangeRequestDto.getNewPassword()));
+        userRepository.save(user);
     }
 }

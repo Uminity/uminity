@@ -49,6 +49,25 @@
     </div>
 </div>
 
+<!-- 좋아요 누른 사람 목록 모달 -->
+<div class="modal fade" id="likeListModal" tabindex="-1" aria-labelledby="likeListModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="likeListModalLabel">좋아요 누른 사람 목록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="likeListContainer">
+                <!-- 좋아요 목록이 여기에 렌더링 됩니다 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- footer -->
 <footer class="bg-light text-center text-lg-start mt-5 border-top">
     <div class="container p-4">
@@ -103,12 +122,21 @@
                             </button>
                         </div>
                         <hr>
-                        <button class="btn btn-outline-secondary" id="likeBtn-${postId}" onclick="toggleLike()"><i class="bi bi-heart" id="likeIcon"></i> 좋아요</button>
+                        
+                        <button class="btn btn-outline-secondary" id="likeBtn" onclick="toggleLike()">
+                        	<i class="bi bi-heart" id="likeIcon"></i> 좋아요
+                        	<span id="likeCount-${postId}">(0명)</span>
+                        </button>
+                       	<button class="btn btn-outline-secondary" id="likeListBtn"onclick="viewLikeListModal()">
+                       		<i class="bi bi-people" id="likeListIcon"></i>
+                        </button>
                     </div>
                 `;
 
             document.getElementById('btnDelete')
                 .addEventListener('click', deletePost);
+            likeList();
+            checkLikePost();
         } catch (err) {
             console.error('게시글 로드 오류:', err);
         }
@@ -400,6 +428,8 @@
             }
         }
 
+        // 좋아요
+        // 좋아요 토글
         async function toggleLike() {
             try {
                 let url = `/api/posts/${postId}/like`;
@@ -411,25 +441,123 @@
                 });
 
                 if (res.ok) {
-                    // 서버에서 응답받은 JSON 파싱
                     let data = await res.json();
                     console.log(data);
 
-                    // UI 업데이트 (예시)
-                    const likeBtn = document.querySelector(`#likeBtn-${postId}`);
-            		const likeIcon = document.querySelector("#likeIcon");
+                    let likeBtn = document.querySelector("#likeBtn");
+            		let likeIcon = document.querySelector("#likeIcon");
+            		let likeListBtn = document.querySelector("#likeListBtn");
+            		let likeListIcon = document.querySelector("#likeListIcon");
             		
             		if (data.likedByMe) {
                         likeBtn.classList.remove("btn-outline-secondary");
                         likeBtn.classList.add("btn-danger");
                         likeIcon.classList.remove("bi-heart");
                         likeIcon.classList.add("bi-heart-fill");
+                        likeListBtn.classList.remove("btn-outline-secondary");
+                        likeListBtn.classList.add("btn-danger");
+                        likeListIcon.classList.remove("bi-people");
+                        likeListIcon.classList.add("bi-people-fill");
                     } else {
                         likeBtn.classList.remove("btn-danger");
                         likeBtn.classList.add("btn-outline-secondary");
                         likeIcon.classList.remove("bi-heart-fill");
                         likeIcon.classList.add("bi-heart");
+                        likeListBtn.classList.remove("btn-danger");
+                        likeListBtn.classList.add("btn-outline-secondary");
+                        likeListIcon.classList.remove("bi-people-fill");
+                        likeListIcon.classList.add("bi-people");
                     }
+            		likeList();
+                } else {
+                    console.error("HTTP Error:", res.status);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        
+        // 좋아요 누른 사람 목록
+        async function likeList() {
+            try {
+                let url = `/api/posts/${postId}/likers`;
+                let res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (res.ok) {
+                    // 서버에서 응답받은 JSON 파싱
+                    let data = await res.json();
+                    console.log(data);
+                    
+                 	// 👍 좋아요 수 업데이트
+                    const likeCountElement = document.getElementById(`likeCount-${postId}`);
+                    likeCountElement.textContent = `(${data.totalElements}명)`;
+                    
+                    const likeListContainer = document.getElementById("likeListContainer");
+                    likeListContainer.innerHTML = "";  // 기존 목록 초기화
+                    
+                    if (data.content.length > 0) {
+                        // 좋아요 목록 렌더링
+                        data.content.forEach(username => {
+                            likeListContainer.insertAdjacentHTML("beforeend", `
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <span>${username}</span>
+                                </div>
+                            `);
+                        });
+                    } else {
+                        likeListContainer.innerHTML = "<p class='text-muted'>아직 좋아요를 누른 사람이 없습니다.</p>";
+                    }
+                    
+                } else {
+                    console.error("HTTP Error:", res.status);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+        
+        function viewLikeListModal() {
+        	const likeListModal = new bootstrap.Modal(document.getElementById("likeListModal"));
+            likeListModal.show();
+        }
+        
+        async function checkLikePost() {
+            try {
+                let url = `/api/posts/${postId}/like`;
+                let res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                let likeBtn = document.querySelector("#likeBtn");
+        		let likeIcon = document.querySelector("#likeIcon");
+        		let likeListBtn = document.querySelector("#likeListBtn");
+        		let likeListIcon = document.querySelector("#likeListIcon");
+        		
+                if (res.ok) {
+                    // 서버에서 응답받은 JSON 파싱
+                    let data = await res.json();
+                    console.log(data);
+                    
+                    if(data.check){
+                    	likeBtn.classList.remove("btn-outline-secondary");
+                        likeBtn.classList.add("btn-danger");
+                        likeIcon.classList.remove("bi-heart");
+                        likeIcon.classList.add("bi-heart-fill");
+                        likeListBtn.classList.remove("btn-outline-secondary");
+                        likeListBtn.classList.add("btn-danger");
+                        likeListIcon.classList.remove("bi-people");
+                        likeListIcon.classList.add("bi-people-fill");	
+                    }
+				
                     
                 } else {
                     console.error("HTTP Error:", res.status);

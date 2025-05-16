@@ -95,6 +95,7 @@
                             </button>
                         </div>
                         <hr>
+                        <button class="btn btn-outline-secondary" id="likeBtn-${postId}" onclick="toggleLike()"><i class="bi bi-heart" id="likeIcon"></i> 좋아요</button>
                     </div>
                 `;
 
@@ -365,7 +366,44 @@
             }
         }
 
+        async function toggleLike() {
+            try {
+                let url = `/api/posts/${postId}/like`;
+                let res = await util.fetchWithCsrf(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
 
+                if (res.ok) {
+                    // 서버에서 응답받은 JSON 파싱
+                    let data = await res.json();
+                    console.log(data);
+
+                    // UI 업데이트 (예시)
+                    const likeBtn = document.querySelector(`#likeBtn-${postId}`);
+            		const likeIcon = document.querySelector("#likeIcon");
+            		
+            		if (data.likedByMe) {
+                        likeBtn.classList.remove("btn-outline-secondary");
+                        likeBtn.classList.add("btn-danger");
+                        likeIcon.classList.remove("bi-heart");
+                        likeIcon.classList.add("bi-heart-fill");
+                    } else {
+                        likeBtn.classList.remove("btn-danger");
+                        likeBtn.classList.add("btn-outline-secondary");
+                        likeIcon.classList.remove("bi-heart-fill");
+                        likeIcon.classList.add("bi-heart");
+                    }
+                    
+                } else {
+                    console.error("HTTP Error:", res.status);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
     </script>
 </body>
 </html>

@@ -119,13 +119,16 @@ async function initUI() {
 
 function showLoginOnly() {
     document.getElementById("navLogin").style.display = "";
+    document.getElementById("navRegister").style.display = "";
     document.getElementById("navUser").style.display = "none";
     document.getElementById("navMyPage").style.display = "none";
     document.getElementById("navLogout").style.display = "none";
+
 }
 
 function showLoggedIn() {
     document.getElementById("navLogin").style.display = "none";
+    document.getElementById("navRegister").style.display = "none";
     document.getElementById("navUser").style.display = "";
     document.getElementById("navMyPage").style.display = "";
     document.getElementById("navLogout").style.display = "";

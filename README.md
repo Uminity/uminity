@@ -25,11 +25,12 @@
 
 ## 👥 팀원
 
-| 이름  | 역할       | 주요 구현 내용                           | GitHub                                            |
-|-----|----------|------------------------------------|---------------------------------------------------|
-| 이희용 | 백엔드 (팀장) | 로그인, 회원가입, 마이페이지                   | [eddie-backdev](https://github.com/eddie-backdev) |
-| 김지산 | 백엔드 (팀원) | 게시글 CRUD, 페이지네이션, 댓글/대댓글, 좋아요, 조회수 | [kjs254](https://github.com/kjs254)               |
-| 정동현 | 백엔드 (팀원) | 게시글 CRUD, 페이지네이션, 좋아요, 조회수, 테스트 코드 | [Iamcalmdown](https://github.com/Iamcalmdown)     |
+| 이름  | 역할       | 주요 구현 내용                           | GitHub                                                                                                                                                         |
+|-----|----------|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 이희용 | 백엔드 (팀장) | 로그인, 회원가입, 마이페이지                   | <a href="https://github.com/eddie-backdev"><img src="https://avatars.githubusercontent.com/u/50799519?v=4" width="100" height="100" alt="eddie-backdev" /></a> |
+| 김지산 | 백엔드 (팀원) | 게시글 CRUD, 페이지네이션, 댓글/대댓글, 좋아요, 조회수 | <a href="https://github.com/kjs254"><img src="https://avatars.githubusercontent.com/u/149364697?v=4" width="100" height="100" alt="eddie-backdev" /></a>       |
+| 정동현 | 백엔드 (팀원) | 게시글 CRUD, 페이지네이션, 좋아요, 조회수, 테스트 코드 | <a href="https://github.com/Iamcalmdown"><img src="https://avatars.githubusercontent.com/u/144317474?v=4" width="100" height="100" alt="eddie-backdev" /></a>  |
+|
 
 ---
 

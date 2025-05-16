@@ -72,10 +72,10 @@
 
 |              로그인 전 메인              |             로그인 후 메인             |           로그인 페이지           |
 |:----------------------------------:|:--------------------------------:|:---------------------------:|
-| ![before](preview/main_before.jpg) | ![after](preview/main_after.jpg) | ![login](preview/login.jpg) |
+| ![before](preview/main_before.JPG) | ![after](preview/main_after.JPG) | ![login](preview/login.JPG) |
 
 |             회원가입 페이지              |              게시글 상세               |             마이페이지             |
 |:---------------------------------:|:---------------------------------:|:-----------------------------:|
-| ![register](preview/register.jpg) | ![detail](preview/postDetail.jpg) | ![myPage](preview/myPage.jpg) |
+| ![register](preview/register.JPG) | ![detail](preview/postDetail.JPG) | ![myPage](preview/myPage.JPG) |
 
 ---

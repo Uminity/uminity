@@ -2,6 +2,7 @@ package com.gujo.uminity.like.controller;
 
 import com.gujo.uminity.common.security.MyUserDetails;
 import com.gujo.uminity.common.web.PageResponse;
+import com.gujo.uminity.like.dto.response.CheckLikeResponse;
 import com.gujo.uminity.like.dto.response.ToggleLikeResponse;
 import com.gujo.uminity.like.service.LikeService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,13 @@ public class LikeController {
 
         ToggleLikeResponse dto = likeService.toggleLike(userId, postId);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{postId}/like")
+    public ResponseEntity<CheckLikeResponse> checkLike(
+            @PathVariable("postId") Long postId,
+            @AuthenticationPrincipal MyUserDetails principal) {
+        return ResponseEntity.ok(likeService.checkLike(principal.getUserId(), postId));
     }
 
     @GetMapping("/{postId}/likers")

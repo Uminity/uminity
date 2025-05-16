@@ -15,7 +15,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     long countByPostPostId(Long postId);
 
-
     @Query("SELECT l.post FROM Like l WHERE l.user.userId = :userId")
     Page<Post> findPostsByUserUserId(@Param("userId") String userId, Pageable pageable);
 
